@@ -1,0 +1,10 @@
+title = "JoPoWa-Vis Config"
+
+description = "Configuration file for the Python visualisation of the Power Water System"
+
+[profile_mapper]
+PV = "pv"
+Wind = "wind"
+CSP = "csp"
+Hydro = "hydro"
+Demand = "demand"
