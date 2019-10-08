@@ -6,8 +6,8 @@ JoPoWa-Vis
 .. image:: https://img.shields.io/pypi/v/jopowa_vis.svg
         :target: https://pypi.python.org/pypi/jopowa_vis
 
-.. image:: https://img.shields.io/travis/simnh/jopowa_vis.svg
-        :target: https://travis-ci.org/simnh/jopowa_vis
+.. image:: https://img.shields.io/travis/znes/JoPoWa-Vis.svg
+        :target: https://travis-ci.org/znes/JoPoWa-Vis
 
 .. image:: https://readthedocs.org/projects/jopowa-vis/badge/?version=latest
         :target: https://jopowa-vis.readthedocs.io/en/latest/?badge=latest
