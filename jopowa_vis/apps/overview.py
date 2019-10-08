@@ -22,7 +22,7 @@ table = dbc.Card([
                                 id='scenario-table-technology',
                                 columns=
                                     [{"id": "Technology", "name": "Technology",
-                                     'deletable': True, 'renamable': True}] + \
+                                     'deletable': False, 'renamable': True}] + \
                                     [{'id': p, 'name': p,
                                       'deletable': True, 'renamable': True}
                                       for p in app.start_scenarios.columns],
@@ -101,9 +101,8 @@ def update_columns(n_clicks, value, existing_columns):
     [Input('button', 'n_clicks')],
      state=[
         State('new-scenario', 'value'),
-        State('scenario-table-technology', 'data')]
-)
-def update_div(n_clicks, scenario_name, data):
+        State('scenario-table-technology', 'data')])
+def save_scenario_changes(n_clicks, scenario_name, data):
     df = pd.DataFrame(data).set_index('Technology')
     # TODO: Fix comparison to work with 'logged state of data' not start
     # scenarios

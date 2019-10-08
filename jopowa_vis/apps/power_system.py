@@ -45,10 +45,11 @@ layout = html.Div([
     [Input('scenario-table-technology', 'data'),
      Input('scenario-select-id', 'value')])
 def display_hourly_graph(rows, scenario):
-    df = pd.DataFrame(rows).set_index('Technology')
-    if scenario == '':
+    if scenario == '' or scenario is None:
         return {}
     else:
+        df = pd.DataFrame(rows).set_index('Technology')
+
         layout = go.Layout(
             barmode="stack",
             title="Hourly supply and demand in for <br> scenario {}.".format(
@@ -105,7 +106,7 @@ def display_hourly_graph(rows, scenario):
     [Input('scenario-table-technology', 'data'),
      Input('scenario-select-id', 'value')])
 def display_aggregated_supply_demand_graph(rows, scenario):
-    if scenario == '':
+    if scenario == '' or scenario is None:
         return {}
     else:
         df = pd.DataFrame(rows).set_index('Technology')

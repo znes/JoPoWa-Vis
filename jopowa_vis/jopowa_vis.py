@@ -74,7 +74,7 @@ def display_page(pathname):
 
 @app.callback(
     Output('scenario-select-id', 'options'),
-    [Input('scenario-table-editing', 'columns')])
+    [Input('scenario-table-technology', 'columns')])
 def update_scenario_select(columns):
     return [{'label': c['id'], 'value': c['name']} for c in columns
             if c['id'] != 'Technology']
