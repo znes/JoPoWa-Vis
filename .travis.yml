@@ -25,5 +25,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: simnh/jopowa_vis
+    repo: znes/jopowa_vis
     python: 3.7
