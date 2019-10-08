@@ -117,12 +117,7 @@ def update_div(n_clicks, scenario_name, data):
             df.to_csv(sc)
             return True, False
 
-@app.callback(
-    Output('scenario-select-id', 'options'),
-    [Input('scenario-table-editing', 'columns')])
-def update_ytable(columns):
-    return [{'label': c['id'], 'value': c['name']} for c in columns
-            if c['id'] != 'Technology']
+
 
 # stacked capacity plot -------------------------------------------------------
 @app.callback(
@@ -191,9 +186,9 @@ def display_timeseries(rows, columns):
         residual_load = {}
         for s, v in df.iteritems():
             residual_load[s] = (
-                v["Demand"] * app.profiles["load"] * 1000 -
+                v["Demand"] * app.profiles["demand"] * 1000 -
                 v["Wind"] * app.profiles["wind"] +
-                v["PV"] * app.profiles["solar"] +
+                v["PV"] * app.profiles["pv"] +
                 v["CSP"] * app.profiles["csp"] +
                 v["Hydro"] * app.profiles["hydro"]
             )

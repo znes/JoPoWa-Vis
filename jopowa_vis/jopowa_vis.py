@@ -14,11 +14,10 @@ app.layout = html.Div([
 
 index_page = dbc.Card([
     dbc.CardHeader([
-
         dbc.Row([
             dbc.Col([
-                html.H2("JoPoWa-Vis - Jordan Power Water Visualisation",
-                        className="card-title"),
+                html.H2("JoPoWa-Vis", className="card-title"),
+                html.H3("Jordan Power Water Visualisation")
             ]),
             dbc.Col([
                 html.Img(
@@ -57,7 +56,7 @@ index_page = dbc.Card([
             dbc.Tab(start_page.map, label="Start Page"),
             dbc.Tab(overview.layout, label="Scenario Overview"),
             dbc.Tab(power_system.layout, label="Power System"),
-            dbc.Tab(power_water_system.layout, label="Power Water System"),
+            dbc.Tab(power_water_system.layout, label="Power & Water System"),
             ])
         ]),
     dbc.CardFooter([
@@ -72,6 +71,14 @@ def display_page(pathname):
         return overview.layout
     else:
         return index_page
+
+@app.callback(
+    Output('scenario-select-id', 'options'),
+    [Input('scenario-table-editing', 'columns')])
+def update_scenario_select(columns):
+    return [{'label': c['id'], 'value': c['name']} for c in columns
+            if c['id'] != 'Technology']
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

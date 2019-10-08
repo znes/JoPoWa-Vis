@@ -122,6 +122,8 @@ def display_aggregated_supply_demand_graph(rows, scenario):
             df.at['Demand', scenario] -
             sum([p for p in aggregated_supply.values()])
         )
+        if aggregated_supply['other'] < 0:
+            aggregated_supply['other'] = 0
 
         aggr_df = pd.Series(aggregated_supply).to_frame()
 
