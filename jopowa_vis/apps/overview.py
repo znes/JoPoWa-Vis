@@ -40,7 +40,10 @@ table = dbc.Card(
                                         }
                                         for p in app.start_scenarios.columns
                                     ],
-                                    data=app.start_scenarios.reset_index().to_dict(
+                                    data=app
+                                    .start_scenarios
+                                    .reset_index()
+                                    .to_dict(
                                         "rows"
                                     ),
                                     editable=True,
@@ -125,7 +128,7 @@ safe_scenario = dbc.Row(
 layout = html.Div([table, plots, safe_scenario])
 
 
-# add column -------------------------------------------------------------------
+# add column ------------------------------------------------------------------
 @app.callback(
     Output("scenario-table-technology", "columns"),
     [Input("add-column-button", "n_clicks")],
@@ -142,7 +145,7 @@ def update_columns(n_clicks, value, existing_columns):
     return existing_columns
 
 
-# save scenario changes --------------------------------------------------------
+# save scenario changes -------------------------------------------------------
 @app.callback(
     [Output("new-scenario", "valid"), Output("new-scenario", "invalid")],
     [Input("button", "n_clicks")],

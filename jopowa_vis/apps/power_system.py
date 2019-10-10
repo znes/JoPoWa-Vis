@@ -131,7 +131,8 @@ def display_aggregated_supply_demand_graph(rows, scenario):
                     value * app.profiles[app.profile_mapper[tech]]
                 ).sum() / 1000  # MWh ->GWh
 
-        # other production is defined as demand - all renewlabes collected above
+        # other production is defined as demand
+        # - all renewlabes collected above
         # no multiplication necessary, as Demand is in GWh
         aggregated_supply["other"] = df.at["Demand", scenario] - sum(
             [p for p in aggregated_supply.values()]

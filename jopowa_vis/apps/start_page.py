@@ -21,7 +21,7 @@ map = dbc.Col(
                 "layout": go.Layout(
                     title="",
                     height=500,
-                    margin=dict(l=20, r=20, t=20, b=20),
+                    margin={"l": 20, "r": 20, "t": 20, "b": 20},
                     mapbox_style="open-street-map",
                     mapbox=go.layout.Mapbox(
                         bearing=0,

@@ -34,13 +34,17 @@ index_page = dbc.Card(
                         dbc.Col(
                             [
                                 html.Img(
-                                    src="https://www.uni-flensburg.de/fileadmin/content/portale/"
-                                    "oeffentliches/dokumente/infomaterial/logos/logo-universitaet/"
-                                    "druck/europa-universitaet-flensburg-hauptlogo-cmyk-300dpi.png",
+                                    src="https://www.uni-flensburg.de/"
+                                    "fileadmin/content/portale/oeffentliches/"
+                                    "dokumente/infomaterial/logos/"
+                                    "logo-universitaet/druck/"
+                                    "europa-universitaet-flensburg-hauptlogo"
+                                    "-cmyk-300dpi.png",
                                     height="50dpi",
                                 ),
                                 html.Img(
-                                    src="https://energydata.info/uploads/group/"
+                                    src="https://energydata.info/"
+                                    "uploads/group/"
                                     "2016-12-08-160800.244704giz-logo.png",
                                     height="50dpi",
                                     style={"align": "right"},
@@ -71,7 +75,9 @@ index_page = dbc.Card(
                                             id="scenario-select-id",
                                             options=[
                                                 {"label": c, "value": c}
-                                                for c in app.start_scenarios.columns
+                                                for c in (
+                                                    app.start_scenarios.columns
+                                                )
                                             ],
                                             value="",
                                             className="mb-3",
