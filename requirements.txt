@@ -92,6 +92,7 @@ tableschema==1.7.4
 tabulator==1.26.1
 toml==0.10.0
 tox==3.14.0
+tox-travis==0.12
 traitlets==4.3.3
 tsam==1.0.5
 twine==1.14.0
