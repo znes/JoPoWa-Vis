@@ -8,7 +8,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
 
-from app import app
+from jopowa_vis.app import app
 
 # card for hourly production --------------------------------------------------
 hourly_power_graph = dbc.Card([

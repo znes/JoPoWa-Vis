@@ -3,8 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from app import app, config
-from apps import start_page, overview, power_system, power_water_system
+from jopowa_vis.app import app, config
+from jopowa_vis.apps import start_page, overview, power_system, power_water_system
 
 
 app.layout = html.Div([

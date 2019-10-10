@@ -39,6 +39,7 @@ setup(
     keywords='jopowa_vis',
     name='jopowa_vis',
     packages=find_packages(include=['jopowa_vis', 'jopowa_vis.*']),
+    py_modules=['jopowa_vis.app', 'jopowa_vis.jopowa_vis'],
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

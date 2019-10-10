@@ -9,7 +9,7 @@ import dash_table
 import pandas as pd
 import plotly.graph_objs as go
 
-from app import app
+from jopowa_vis.app import app
 
 slider = dbc.Row([
     dbc.Col([
