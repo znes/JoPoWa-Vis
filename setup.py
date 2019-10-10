@@ -20,7 +20,7 @@ test_requirements = [ ]
 setup(
     author="Simon Hilpert",
     author_email='simon.hilpert@uni-flensburg.de',
-    python_requires='>=3.5.3',
+    python_requires='>=3.5.2',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
