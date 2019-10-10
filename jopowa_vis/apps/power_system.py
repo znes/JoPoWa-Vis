@@ -1,8 +1,8 @@
-
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+
 # import dash_table
 
 import pandas as pd
@@ -11,44 +11,52 @@ import plotly.graph_objs as go
 from jopowa_vis.app import app
 
 # card for hourly production --------------------------------------------------
-hourly_power_graph = dbc.Card([
-        dbc.CardHeader([
-            "Hourly Power Supply and Demand"
-        ]),
-        dbc.CardBody([
-            dbc.Row([
-                dbc.Col([
-                    dcc.Graph(
-                        id="hourly-production-graph",
-                        figure={
-                        }
-                    )
-                ], width=8),
-                dbc.Col([
-                    dcc.Graph(
-                        id="supply_demand_aggr_graph",
-                        figure={
-                        }
-                    )
-                ], width=4)
-            ])
-        ])
-    ])
+hourly_power_graph = dbc.Card(
+    [
+        dbc.CardHeader(["Hourly Power Supply and Demand"]),
+        dbc.CardBody(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                dcc.Graph(
+                                    id="hourly-production-graph", figure={}
+                                )
+                            ],
+                            width=8,
+                        ),
+                        dbc.Col(
+                            [
+                                dcc.Graph(
+                                    id="supply_demand_aggr_graph", figure={}
+                                )
+                            ],
+                            width=4,
+                        ),
+                    ]
+                )
+            ]
+        ),
+    ]
+)
 
 
+layout = html.Div([hourly_power_graph])
 
-layout = html.Div([
-    hourly_power_graph])
 
 @app.callback(
-    Output('hourly-production-graph', 'figure'),
-    [Input('scenario-table-technology', 'data'),
-     Input('scenario-select-id', 'value')])
+    Output("hourly-production-graph", "figure"),
+    [
+        Input("scenario-table-technology", "data"),
+        Input("scenario-select-id", "value"),
+    ],
+)
 def display_hourly_graph(rows, scenario):
-    if scenario == '' or scenario is None:
+    if scenario == "" or scenario is None:
         return {}
     else:
-        df = pd.DataFrame(rows).set_index('Technology')
+        df = pd.DataFrame(rows).set_index("Technology")
 
         layout = go.Layout(
             barmode="stack",
@@ -78,10 +86,11 @@ def display_hourly_graph(rows, scenario):
                     data.append(
                         go.Scatter(
                             x=app.profiles.index,
-                            y=float(val) * 1000 * \
-                                   app.profiles[app.profile_mapper.get(c)],
+                            y=float(val)
+                            * 1000
+                            * app.profiles[app.profile_mapper.get(c)],
                             name=c,
-                            line=dict(width=3, color="darkred")
+                            line=dict(width=3, color="darkred"),
                         )
                     )
                 else:
@@ -89,42 +98,46 @@ def display_hourly_graph(rows, scenario):
                         go.Scatter(
                             x=app.profiles.index,
                             fillcolor=app.color_dict.get(c.lower(), "black"),
-                            y=float(val) * \
-                                    app.profiles[app.profile_mapper.get(c)],
+                            y=float(val)
+                            * app.profiles[app.profile_mapper.get(c)],
                             name=c,
                             stackgroup="positive",
                             line=dict(
                                 width=0,
-                                color=app.color_dict.get(c.lower(), "black")),
+                                color=app.color_dict.get(c.lower(), "black"),
+                            ),
                         )
                     )
         return {"data": data, "layout": layout}
 
 
 @app.callback(
-    Output('supply_demand_aggr_graph', 'figure'),
-    [Input('scenario-table-technology', 'data'),
-     Input('scenario-select-id', 'value')])
+    Output("supply_demand_aggr_graph", "figure"),
+    [
+        Input("scenario-table-technology", "data"),
+        Input("scenario-select-id", "value"),
+    ],
+)
 def display_aggregated_supply_demand_graph(rows, scenario):
-    if scenario == '' or scenario is None:
+    if scenario == "" or scenario is None:
         return {}
     else:
-        df = pd.DataFrame(rows).set_index('Technology')
+        df = pd.DataFrame(rows).set_index("Technology")
 
         aggregated_supply = {}
         for tech, value in df[scenario].iteritems():
-            if tech in ['Wind', 'PV', 'CSP']:
+            if tech in ["Wind", "PV", "CSP"]:
                 aggregated_supply[tech] = (
-                    value * app.profiles[app.profile_mapper[tech]]).sum() / 1000 # MWh ->GWh
+                    value * app.profiles[app.profile_mapper[tech]]
+                ).sum() / 1000  # MWh ->GWh
 
         # other production is defined as demand - all renewlabes collected above
         # no multiplication necessary, as Demand is in GWh
-        aggregated_supply['other'] = (
-            df.at['Demand', scenario] -
-            sum([p for p in aggregated_supply.values()])
+        aggregated_supply["other"] = df.at["Demand", scenario] - sum(
+            [p for p in aggregated_supply.values()]
         )
-        if aggregated_supply['other'] < 0:
-            aggregated_supply['other'] = 0
+        if aggregated_supply["other"] < 0:
+            aggregated_supply["other"] = 0
 
         aggr_df = pd.Series(aggregated_supply).to_frame()
 
@@ -138,7 +151,7 @@ def display_aggregated_supply_demand_graph(rows, scenario):
                 title="Energy in GWh",
                 titlefont=dict(size=16, color="rgb(107, 107, 107)"),
                 tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-            )
+            ),
         )
 
         data = [
@@ -147,6 +160,8 @@ def display_aggregated_supply_demand_graph(rows, scenario):
                 y=row.values,
                 name=idx,
                 marker=dict(color=app.color_dict.get(idx.lower(), "gray")),
-            )  for idx, row in aggr_df.T.iteritems()]
+            )
+            for idx, row in aggr_df.T.iteritems()
+        ]
 
         return {"data": data, "layout": layout}

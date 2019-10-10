@@ -11,18 +11,34 @@ import plotly.graph_objs as go
 
 from jopowa_vis.app import app
 
-slider = dbc.Row([
-    dbc.Col([
-        dbc.FormGroup([
-            dbc.Label("Water Pumping", html_for="slider"),
-            dcc.Slider(id="pumping_slider", min=0, max=10, step=0.5, value=3),
-            dbc.Label("Water Desalination ", html_for="slider"),
-            dcc.Slider(id="desalination_slider", min=0, max=10, step=0.5, value=3),
-        ])
-    ]),
-    dbc.Col([])
-])
+slider = dbc.Row(
+    [
+        dbc.Col(
+            [
+                dbc.FormGroup(
+                    [
+                        dbc.Label("Water Pumping", html_for="slider"),
+                        dcc.Slider(
+                            id="pumping_slider",
+                            min=0,
+                            max=10,
+                            step=0.5,
+                            value=3,
+                        ),
+                        dbc.Label("Water Desalination ", html_for="slider"),
+                        dcc.Slider(
+                            id="desalination_slider",
+                            min=0,
+                            max=10,
+                            step=0.5,
+                            value=3,
+                        ),
+                    ]
+                )
+            ]
+        ),
+        dbc.Col([]),
+    ]
+)
 
-layout = html.Div([
-    slider
-])
+layout = html.Div([slider])
