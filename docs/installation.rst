@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/simnh/jopowa_vis
+    $ git clone git://github.com/znes/jopowa-vis
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/simnh/jopowa_vis/tarball/master
+    $ curl -OJL https://github.com/znes/jopowa-vis/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/simnh/jopowa_vis
-.. _tarball: https://github.com/simnh/jopowa_vis/tarball/master
+.. _Github repo: https://github.com/znes/jopowa-vis
+.. _tarball: https://github.com/znes/jopowa-vis/tarball/master

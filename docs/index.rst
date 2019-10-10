@@ -8,7 +8,6 @@ Welcome to JoPoWa-Vis's documentation!
    readme
    installation
    usage
-   modules
    contributing
    authors
    history
