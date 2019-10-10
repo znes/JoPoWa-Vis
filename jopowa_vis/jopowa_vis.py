@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from app import app
+from app import app, config
 from apps import start_page, overview, power_system, power_water_system
 
 
@@ -16,8 +16,8 @@ index_page = dbc.Card([
     dbc.CardHeader([
         dbc.Row([
             dbc.Col([
-                html.H2("JoPoWa-Vis", className="card-title"),
-                html.H3("Jordan Power Water Visualisation")
+                html.H2(config['headings']['title'], className="card-title"),
+                html.H3(config['headings']['sub-title'])
             ]),
             dbc.Col([
                 html.Img(

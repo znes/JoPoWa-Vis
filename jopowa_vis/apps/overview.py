@@ -71,7 +71,7 @@ safe_scenario = dbc.Row([
                         dbc.Input(id="new-scenario", type="text", value=""),
                         dbc.FormText("Please enter new scenario name..."),
                         dbc.FormFeedback("Scenario saved...", valid=True),
-                        dbc.FormFeedback("Scenario name exists...", valid=False),
+                        dbc.FormFeedback("Error saving...", valid=False),
                         dbc.Button('Save Changes', id='button')]
                     )
                 ])
@@ -94,7 +94,7 @@ def update_columns(n_clicks, value, existing_columns):
         })
     return existing_columns
 
-# safe scenario changes --------------------------------------------------------
+# save scenario changes --------------------------------------------------------
 @app.callback(
     [Output("new-scenario", "valid"),
      Output("new-scenario", "invalid")],

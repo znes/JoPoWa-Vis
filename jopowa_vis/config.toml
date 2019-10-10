@@ -2,9 +2,23 @@ title = "JoPoWa-Vis Config"
 
 description = "Configuration file for the Python visualisation of the Power Water System"
 
+[headings]
+title = "JoPoWA-Vis"
+sub-title = "Visulatisation of Jordan Power and Water System"
+
 [profile_mapper]
 PV = "pv"
 Wind = "wind"
 CSP = "csp"
 Hydro = "hydro"
 Demand = "demand"
+
+# colors will be used for plots. If not specified colors from oemof.tabular
+# will be used as default values for technologies and carriers ('gas', 'coal')
+[colors]
+geothermal= "darkred"
+csp = "orange"
+
+[paths]
+start-scenarios = "data/start-scenarios.csv"
+profiles = "data/profiles.csv"
