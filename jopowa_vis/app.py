@@ -1,3 +1,4 @@
+from pkg_resources import resource_filename
 import dash
 import dash_bootstrap_components as dbc
 
@@ -12,7 +13,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.config.suppress_callback_exceptions = True
 
-config = toml.load("config.toml")
+config = toml.load(resource_filename("jopowa_vis", "config.toml"))
 
 # update color dictionary for plots
 color_dict.update(config["colors"])
@@ -23,9 +24,9 @@ app.profile_mapper = config['profile_mapper']
 
 # read basic data
 app.start_scenarios = pd.read_csv(
-    config["paths"]['start-scenarios'], index_col=0)
+    resource_filename("jopowa_vis", config["paths"]['start-scenarios']), index_col=0)
 app.profiles = pd.read_csv(
-    config["paths"]['profiles'], index_col=0, parse_dates=True)
+    resource_filename("jopowa_vis", config["paths"]['profiles']), index_col=0, parse_dates=True)
 
 if set(app.profiles) != set(app.profile_mapper.values()):
     raise ValueError("Missing key/values in profile mapper.")
