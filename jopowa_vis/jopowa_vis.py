@@ -127,5 +127,9 @@ def update_scenario_select(columns):
     ]
 
 
+def serve():
+    app.run_server(debug=True)
+
+
 if __name__ == "__main__":
     app.run_server(debug=True)
