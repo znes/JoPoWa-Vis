@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from jopowa_vis.app import app, config
+from jopowa_vis.app import app, config, start_scenarios
 from jopowa_vis.apps import (
     start_page,
     overview,
@@ -76,7 +76,7 @@ index_page = dbc.Card(
                                             options=[
                                                 {"label": c, "value": c}
                                                 for c in (
-                                                    app.start_scenarios.columns
+                                                    start_scenarios.columns
                                                 )
                                             ],
                                             value="",

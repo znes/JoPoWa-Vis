@@ -13,11 +13,19 @@ CSP = "csp"
 Hydro = "hydro"
 Demand = "demand"
 
+[units]
+energy = "GWh"
+power = "MW"
+water = "Mm3"
+
 # colors will be used for plots. If not specified colors from oemof.tabular
 # will be used as default values for technologies and carriers ('gas', 'coal')
 [colors]
 geothermal= "darkred"
 csp = "orange"
+other = "gray"
+demand = "darkblue"
+excess = "pink"
 
 [paths]
 start-scenarios = "data/start-scenarios.csv"

@@ -9,6 +9,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app
+from jopowa_vis.apps import calculations
 
 # card for hourly production --------------------------------------------------
 hourly_power_graph = dbc.Card(
@@ -87,7 +88,7 @@ def display_hourly_graph(rows, scenario):
                         go.Scatter(
                             x=app.profiles.index,
                             y=float(val)
-                            * 1000
+                            * 1000  # GWh -> TWh
                             * app.profiles[app.profile_mapper.get(c)],
                             name=c,
                             line=dict(width=3, color="darkred"),
@@ -124,32 +125,21 @@ def display_aggregated_supply_demand_graph(rows, scenario):
     else:
         df = pd.DataFrame(rows).set_index("Technology")
 
-        aggregated_supply = {}
-        for tech, value in df[scenario].iteritems():
-            if tech in ["Wind", "PV", "CSP"]:
-                aggregated_supply[tech] = (
-                    value * app.profiles[app.profile_mapper[tech]]
-                ).sum() / 1000  # MWh ->GWh
+        timeseries = calculations.timeseries(df[scenario])
 
-        # other production is defined as demand
-        # - all renewlabes collected above
-        # no multiplication necessary, as Demand is in GWh
-        aggregated_supply["other"] = df.at["Demand", scenario] - sum(
-            [p for p in aggregated_supply.values()]
-        )
-        if aggregated_supply["other"] < 0:
-            aggregated_supply["other"] = 0
+        agg = (timeseries.sum() / 1e6).drop(["RL"])  # MWh -> GWh
 
-        aggr_df = pd.Series(aggregated_supply).to_frame()
+        # convert to negative for plotting
+        agg[["Demand", "Excess"]] = agg[["Demand", "Excess"]].multiply(-1)
 
         layout = go.Layout(
-            barmode="stack",
+            barmode="relative",
             title="Aggregated Supply and demand for <br> {} scenario".format(
                 scenario
             ),
             width=400,
             yaxis=dict(
-                title="Energy in GWh",
+                title="Energy in TWh",
                 titlefont=dict(size=16, color="rgb(107, 107, 107)"),
                 tickfont=dict(size=14, color="rgb(107, 107, 107)"),
             ),
@@ -159,10 +149,12 @@ def display_aggregated_supply_demand_graph(rows, scenario):
             go.Bar(
                 x=row.index,
                 y=row.values,
+                text=[v.round(1) for v in row.values],
+                textposition="auto",
                 name=idx,
                 marker=dict(color=app.color_dict.get(idx.lower(), "gray")),
             )
-            for idx, row in aggr_df.T.iteritems()
+            for idx, row in agg.to_frame().T.iteritems()
         ]
 
         return {"data": data, "layout": layout}

@@ -9,8 +9,7 @@ import dash_table
 import pandas as pd
 import plotly.graph_objs as go
 
-from jopowa_vis.app import app
-
+from jopowa_vis.app import app, start_scenarios
 
 table = dbc.Card(
     [
@@ -38,12 +37,9 @@ table = dbc.Card(
                                             "deletable": True,
                                             "renamable": True,
                                         }
-                                        for p in app.start_scenarios.columns
+                                        for p in start_scenarios.columns
                                     ],
-                                    data=app
-                                    .start_scenarios
-                                    .reset_index()
-                                    .to_dict(
+                                    data=start_scenarios.reset_index().to_dict(
                                         "rows"
                                     ),
                                     editable=True,
@@ -158,7 +154,7 @@ def save_scenario_changes(n_clicks, scenario_name, data):
     df = pd.DataFrame(data).set_index("Technology")
     # TODO: Fix comparison to work with 'logged state of data' not start
     # scenarios
-    if df.equals(app.start_scenarios):
+    if df.equals(start_scenarios):
         return False, True
     else:
         sc = scenario_name.replace(" ", "-").lower() + ".csv"
