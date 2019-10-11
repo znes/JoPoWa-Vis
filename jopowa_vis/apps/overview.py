@@ -10,6 +10,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, start_scenarios
+from jopowa_vis.apps import calculations
 
 table = dbc.Card(
     [
@@ -105,23 +106,23 @@ plots = dbc.Card(
     className="mt-3",
 )
 
-safe_scenario = dbc.Row(
+safe_scenarios = dbc.Row(
     [
         dbc.FormGroup(
             id="form",
             children=[
-                dbc.Label("Save Scenario"),
-                dbc.Input(id="new-scenario", type="text", value=""),
-                dbc.FormText("Please enter new scenario name..."),
-                dbc.FormFeedback("Scenario saved...", valid=True),
-                dbc.FormFeedback("Error saving...", valid=False),
+                dbc.Label("Save Scenarios"),
+                dbc.Input(id="new-scenarios", type="text", value=""),
+                dbc.FormText("Enter new scenario set name..."),
+                dbc.FormFeedback("Scenario set saved!", valid=True),
+                dbc.FormFeedback("Scenario set name exists!", valid=False),
                 dbc.Button("Save Changes", id="button"),
             ],
         )
     ]
 )
 
-layout = html.Div([table, plots, safe_scenario])
+layout = html.Div([table, plots, safe_scenarios])
 
 
 # add column ------------------------------------------------------------------
@@ -143,26 +144,31 @@ def update_columns(n_clicks, value, existing_columns):
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
-    [Output("new-scenario", "valid"), Output("new-scenario", "invalid")],
+    [Output("new-scenarios", "valid"), Output("new-scenarios", "invalid")],
     [Input("button", "n_clicks")],
     state=[
-        State("new-scenario", "value"),
+        State("new-scenarios", "value"),
         State("scenario-table-technology", "data"),
     ],
 )
 def save_scenario_changes(n_clicks, scenario_name, data):
     df = pd.DataFrame(data).set_index("Technology")
-    # TODO: Fix comparison to work with 'logged state of data' not start
-    # scenarios
-    if df.equals(start_scenarios):
+
+    directory = os.path.join(
+        os.path.expanduser("~"), "jopowa-vis", "scenarios"
+    )
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    sc = os.path.join(
+        directory, scenario_name.replace(" ", "-").lower() + ".csv"
+    )
+    if os.path.isfile(sc):
         return False, True
     else:
-        sc = scenario_name.replace(" ", "-").lower() + ".csv"
-        if os.path.isfile(sc):
-            return False, True
-        else:
-            df.to_csv(sc)
-            return True, False
+        df.to_csv(sc)
+        return True, False
 
 
 # stacked capacity plot -------------------------------------------------------
@@ -203,7 +209,7 @@ def display_output(data, columns):
         ],
         "layout": go.Layout(
             barmode="stack",
-            title="Installed capacities and demand for 2030 scenarios",
+            title="Installed capacities and demand scenarios",
             legend=dict(x=1.1, y=0),
             yaxis=dict(
                 title="Capacity in MW",
@@ -230,7 +236,7 @@ def display_output(data, columns):
         Input("scenario-table-technology", "columns"),
     ],
 )
-def display_timeseries(rows, columns):
+def display_timeseries(rows, scenarios):
     df = pd.DataFrame(rows).set_index("Technology")
     # convert to float
     for c in df.columns:
@@ -238,16 +244,11 @@ def display_timeseries(rows, columns):
 
     if not df.isnull().values.any():
         residual_load = {}
-        for s, v in df.iteritems():
-            residual_load[s] = (
-                v["Demand"] * app.profiles["demand"] * 1000
-                - v["Wind"] * app.profiles["wind"]
-                + v["PV"] * app.profiles["pv"]
-                + v["CSP"] * app.profiles["csp"]
-                + v["Hydro"] * app.profiles["hydro"]
-            )
-            residual_load[s] = (
-                residual_load[s].sort_values(ascending=False).values
+        for c in df.columns:
+            residual_load[c] = (
+                calculations.timeseries(df[c])["RL"]
+                .sort_values(ascending=False)
+                .values
             )
 
         return {
