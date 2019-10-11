@@ -11,4 +11,4 @@ Development Lead
 Contributors
 ------------
 
-
+* Stephan Günther <stguenth@iks.cs.ovgu.de>

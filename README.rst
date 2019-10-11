@@ -24,10 +24,12 @@ JoPoWa-Vis
 * Documentation: https://jopowa-vis.readthedocs.io.
 
 
-Features
+
+Funding
 --------
 
-* TODO
+This project was funded by Deutsche Gesellschaft für Internationale
+Zusammenarbeit (GIZ) grant number 81243459.
 
 Credits
 -------
