@@ -9,8 +9,92 @@ import dash_table
 import pandas as pd
 import plotly.graph_objs as go
 
-from jopowa_vis.app import app, start_scenarios
+from jopowa_vis.app import app
 from jopowa_vis.apps import calculations
+
+import io
+import base64
+
+upload = html.Div(
+    [
+        dcc.Upload(
+            id="datatable-upload",
+            children=html.Div(["Drag and Drop or ", html.A("Select Files")]),
+            style={
+                "width": "100%",
+                "height": "60px",
+                "lineHeight": "60px",
+                "borderWidth": "1px",
+                "borderStyle": "dashed",
+                "borderRadius": "5px",
+                "textAlign": "center",
+                "margin": "10px",
+            },
+        )
+    ]
+)
+
+
+def parse_contents(contents, filename):
+    content_type, content_string = contents.split(",")
+    decoded = base64.b64decode(content_string)
+    if "csv" in filename:
+        # Assume that the user uploaded a CSV file
+        return pd.read_csv(io.StringIO(decoded.decode("utf-8")))
+    elif "xls" in filename:
+        # Assume that the user uploaded an excel file
+        return pd.read_excel(io.BytesIO(decoded))
+
+
+@app.callback(
+    [
+        Output("scenario-table-technology", "data"),
+        Output("scenario-table-technology", "columns"),
+    ],
+    [
+        Input("add-column-button", "n_clicks"),
+        Input("datatable-upload", "contents"),
+    ],
+    [
+        State("datatable-upload", "filename"),
+        State("add-column-input", "value"),
+        State("scenario-table-technology", "data"),
+        State("scenario-table-technology", "columns"),
+    ],
+)
+def update_output(
+    n_clicks, contents, filename, value, existing_data, existing_columns
+):
+
+    # need to return a valid column is callback is called
+    if existing_columns is None:
+        return [{}], [{"id": "Technology", "name": "Technology"}]
+
+    # if callback is triggered by button
+    if n_clicks > 0:
+        existing_columns.append(
+            {
+                "id": value,
+                "name": value,
+                "renamable": False,
+                "deletable": True,
+                "type": "numeric",
+            }
+        )
+        return existing_data, existing_columns
+
+    if contents is None:
+        return existing_data, existing_columns
+
+    df = parse_contents(contents, filename)
+    return (
+        df.to_dict("records"),
+        [
+            {"id": value, "name": value, "renamable": False, "deletable": True}
+            for value in df.columns
+        ],
+    )
+
 
 table = dbc.Card(
     [
@@ -23,26 +107,7 @@ table = dbc.Card(
                             children=[
                                 dash_table.DataTable(
                                     id="scenario-table-technology",
-                                    columns=[
-                                        {
-                                            "id": "Technology",
-                                            "name": "Technology",
-                                            "deletable": False,
-                                            "renamable": True,
-                                        }
-                                    ]
-                                    + [
-                                        {
-                                            "id": p,
-                                            "name": p,
-                                            "deletable": True,
-                                            "renamable": True,
-                                        }
-                                        for p in start_scenarios.columns
-                                    ],
-                                    data=start_scenarios.reset_index().to_dict(
-                                        "rows"
-                                    ),
+                                    data=[{}],
                                     editable=True,
                                 ),
                                 dbc.FormGroup(
@@ -59,6 +124,7 @@ table = dbc.Card(
                                         dbc.Button(
                                             "Add column",
                                             id="add-column-button",
+                                            n_clicks=0,
                                         ),
                                     ]
                                 ),
@@ -122,24 +188,7 @@ safe_scenarios = dbc.Row(
     ]
 )
 
-layout = html.Div([table, plots, safe_scenarios])
-
-
-# add column ------------------------------------------------------------------
-@app.callback(
-    Output("scenario-table-technology", "columns"),
-    [Input("add-column-button", "n_clicks")],
-    [
-        State("add-column-input", "value"),
-        State("scenario-table-technology", "columns"),
-    ],
-)
-def update_columns(n_clicks, value, existing_columns):
-    if n_clicks > 0:
-        existing_columns.append(
-            {"id": value, "name": value, "renamable": True, "deletable": True}
-        )
-    return existing_columns
+layout = html.Div([upload, table, plots, safe_scenarios])
 
 
 # save scenario changes -------------------------------------------------------
@@ -180,6 +229,11 @@ def save_scenario_changes(n_clicks, scenario_name, data):
     ],
 )
 def display_output(data, columns):
+    df = pd.DataFrame(data)
+    # check if dataframe is empty to avoid errors
+    if df.empty:
+        return {}
+
     df = pd.DataFrame(data).set_index("Technology")
 
     return {
@@ -236,26 +290,29 @@ def display_output(data, columns):
         Input("scenario-table-technology", "columns"),
     ],
 )
-def display_timeseries(rows, scenarios):
-    df = pd.DataFrame(rows).set_index("Technology")
+def display_timeseries(data, scenarios):
+    df = pd.DataFrame(data)
+    # check if dataframe is empty to avoid errors
+    if df.empty:
+        return {}
+
+    df.set_index("Technology", inplace=True)
     # convert to float
     for c in df.columns:
         df[c] = df[c].astype("float")
 
-    if not df.isnull().values.any():
-        residual_load = {}
-        for c in df.columns:
-            residual_load[c] = (
-                calculations.timeseries(df[c])["RL"]
-                .sort_values(ascending=False)
-                .values
-            )
+    # if not df.isnull().values.any():
+    residual_load = {}
+    for c in df.columns:
+        residual_load[c] = (
+            calculations.timeseries(df[c])["RL"]
+            .sort_values(ascending=False)
+            .values
+        )
 
-        return {
-            "data": [
-                go.Scatter(name=k, x=[i for i in range(8760)], y=v)
-                for k, v in residual_load.items()
-            ]
-        }
-    else:
-        return {}
+    return {
+        "data": [
+            go.Scatter(name=k, x=[i for i in range(8760)], y=v)
+            for k, v in residual_load.items()
+        ]
+    }

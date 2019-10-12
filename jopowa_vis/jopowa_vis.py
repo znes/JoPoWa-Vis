@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from jopowa_vis.app import app, config, start_scenarios
+from jopowa_vis.app import app, config
 from jopowa_vis.apps import (
     start_page,
     overview,
@@ -73,13 +73,6 @@ index_page = dbc.Card(
                                         dbc.Label("Select scenario"),
                                         dcc.Dropdown(
                                             id="scenario-select-id",
-                                            options=[
-                                                {"label": c, "value": c}
-                                                for c in (
-                                                    start_scenarios.columns
-                                                )
-                                            ],
-                                            value="",
                                             className="mb-3",
                                         ),
                                     ]
@@ -120,6 +113,9 @@ def display_page(pathname):
     [Input("scenario-table-technology", "columns")],
 )
 def update_scenario_select(columns):
+    if columns is None:
+        return None
+
     return [
         {"label": c["id"], "value": c["name"]}
         for c in columns

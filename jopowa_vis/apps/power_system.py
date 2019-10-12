@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 # import dash_table
 
@@ -57,7 +57,14 @@ def display_hourly_graph(rows, scenario):
     if scenario == "" or scenario is None:
         return {}
     else:
-        df = pd.DataFrame(rows).set_index("Technology")
+        df = pd.DataFrame(rows)
+
+        if scenario not in df.columns:
+            return {}
+        elif df[scenario].isnull().any():
+            return {}
+
+        df.set_index("Technology", inplace=True)
 
         layout = go.Layout(
             barmode="stack",
@@ -119,17 +126,24 @@ def display_hourly_graph(rows, scenario):
         Input("scenario-select-id", "value"),
     ],
 )
-def display_aggregated_supply_demand_graph(rows, scenario):
+def display_aggregated_supply_demand_graph(data, scenario):
     if scenario == "" or scenario is None:
         return {}
     else:
-        df = pd.DataFrame(rows).set_index("Technology")
+        df = pd.DataFrame(data)
+
+        if scenario not in df.columns:
+            return {}
+        elif df[scenario].isnull().any():
+            return {}
+
+        df.set_index("Technology", inplace=True)
 
         timeseries = calculations.timeseries(df[scenario])
 
         agg = (timeseries.sum() / 1e6).drop(["RL"])  # MWh -> GWh
-
         # convert to negative for plotting
+
         agg[["Demand", "Excess"]] = agg[["Demand", "Excess"]].multiply(-1)
 
         layout = go.Layout(
