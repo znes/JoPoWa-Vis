@@ -25,10 +25,7 @@ app.color_dict = color_dict
 app.profile_mapper = config["profile_mapper"]
 
 # read basic data
-start_scenarios = pd.read_csv(
-    resource_filename("jopowa_vis", config["paths"]["start-scenarios"]),
-    index_col=0,
-)
+
 app.profiles = pd.read_csv(
     resource_filename("jopowa_vis", config["paths"]["profiles"]),
     index_col=0,

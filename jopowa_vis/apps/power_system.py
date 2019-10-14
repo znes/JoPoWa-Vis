@@ -100,6 +100,33 @@ def display_hourly_graph(rows, scenario):
                         line=dict(width=3, color="darkred"),
                     )
                 )
+            elif "storage" in c:
+                data.append(
+                    go.Scatter(
+                        x=df.index,
+                        y=df[c].clip(lower=0),
+                        name=c,
+                        stackgroup="positive",
+                        line=dict(
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
+                        ),
+                        showlegend=True,
+                    )
+                )
+                data.append(
+                    go.Scatter(
+                        x=df.index,
+                        y=df[c].clip(upper=0),
+                        name=c,
+                        stackgroup="negative",
+                        line=dict(
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
+                        ),
+                        showlegend=False,
+                    )
+                )
             else:
                 data.append(
                     go.Scatter(
@@ -117,44 +144,7 @@ def display_hourly_graph(rows, scenario):
         return {"data": data, "layout": layout}
 
     else:
-        df = pd.DataFrame(rows)
-
-        if scenario not in df.columns:
-            return {}
-        elif df[scenario].isnull().any():
-            return {}
-
-        df.set_index("Technology", inplace=True)
-
-        for c, val in df[scenario].iteritems():
-            if c in app.profile_mapper.keys():
-                if "Demand" in c:
-                    data.append(
-                        go.Scatter(
-                            x=app.profiles.index,
-                            y=float(val)
-                            * 1000  # GWh -> TWh
-                            * app.profiles[app.profile_mapper.get(c)],
-                            name=c,
-                            line=dict(width=3, color="darkred"),
-                        )
-                    )
-                else:
-                    data.append(
-                        go.Scatter(
-                            x=app.profiles.index,
-                            fillcolor=app.color_dict.get(c.lower(), "black"),
-                            y=float(val)
-                            * app.profiles[app.profile_mapper.get(c)],
-                            name=c,
-                            stackgroup="positive",
-                            line=dict(
-                                width=0,
-                                color=app.color_dict.get(c.lower(), "black"),
-                            ),
-                        )
-                    )
-        return {"data": data, "layout": layout}
+        return {}
 
 
 @app.callback(

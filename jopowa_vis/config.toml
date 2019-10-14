@@ -28,5 +28,4 @@ demand = "darkblue"
 excess = "pink"
 
 [paths]
-start-scenarios = "data/start-scenarios.csv"
-profiles = "data/profiles.csv"
+profiles = "data/jordan-input-data/profile/energy-water-profile.csv"
