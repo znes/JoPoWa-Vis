@@ -1,0 +1,60 @@
+{
+    "profile": "tabular-data-package",
+    "resources": [
+ 
+ 	{
+            "path": "energy-water-profile.csv",
+            "profile": "tabular-data-resource",
+            "name": "energy-water-profile",
+            "format": "csv",
+            "mediatype": "text/csv",
+            "encoding": "utf-8",
+            "schema": {
+                "fields": [
+		    {
+                        "name": "timeindex",
+                        "type": "string",
+                        "format": "default"
+                    },	
+		    {
+                        "name": "demand",
+                        "type": "number",
+                        "format": "default"
+                    },
+                    {
+                        "name": "pv",
+                        "type": "number",
+                        "format": "default"
+                    },
+                    {
+                        "name": "csp",
+                        "type": "number",
+                        "format": "default"
+                    },
+                    {
+                        "name": "wind",
+                        "type": "number",
+                        "format": "default"
+                    },
+                    {
+                        "name": "hydro",
+                        "type": "number",
+                        "format": "default"
+                    }
+                ],
+                "missingValues": [
+                    ""
+                ]
+            }
+        }
+      
+    ],
+    "description": "",
+    "contributors": [
+        {
+            "title": "'Simon Hilpert'",
+            "email": "simon.hilpert@uni-flensburg.de",
+            "role": "author"
+        }
+    ]
+}
