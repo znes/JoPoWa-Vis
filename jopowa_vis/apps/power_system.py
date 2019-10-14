@@ -1,3 +1,5 @@
+import os
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -8,7 +10,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
 
-from jopowa_vis.app import app
+from jopowa_vis.app import app, results_directory
 from jopowa_vis.apps import calculations
 
 # card for hourly production --------------------------------------------------
@@ -54,8 +56,66 @@ layout = html.Div([hourly_power_graph])
     ],
 )
 def display_hourly_graph(rows, scenario):
+    """
+    """
+    layout = go.Layout(
+        barmode="stack",
+        title="Hourly supply and demand in for <br> scenario {}.".format(
+            scenario
+        ),
+        yaxis=dict(
+            title="Energy in MWh",
+            titlefont=dict(size=16, color="rgb(107, 107, 107)"),
+            tickfont=dict(size=14, color="rgb(107, 107, 107)"),
+        ),
+        yaxis2=dict(
+            title="Energy in MWh",
+            overlaying="y",
+            rangemode="tozero",
+            autorange=True,
+            side="right",
+            showgrid=False,
+        ),
+    )
+
+    data = []
+
     if scenario == "" or scenario is None:
         return {}
+
+    elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
+        df = pd.read_csv(
+            os.path.join(results_directory, scenario + ".csv"),
+            parse_dates=True,
+            index_col=0,
+        )
+
+        for c in df.columns:
+            if "demand" in c:
+                data.append(
+                    go.Scatter(
+                        x=df.index,
+                        y=df[c],
+                        name=c,
+                        line=dict(width=3, color="darkred"),
+                    )
+                )
+            else:
+                data.append(
+                    go.Scatter(
+                        x=df.index,
+                        fillcolor=app.color_dict.get(c.lower(), "black"),
+                        y=df[c].clip(lower=0),
+                        name=c,
+                        stackgroup="positive",
+                        line=dict(
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
+                        ),
+                    )
+                )
+        return {"data": data, "layout": layout}
+
     else:
         df = pd.DataFrame(rows)
 
@@ -65,28 +125,6 @@ def display_hourly_graph(rows, scenario):
             return {}
 
         df.set_index("Technology", inplace=True)
-
-        layout = go.Layout(
-            barmode="stack",
-            title="Hourly supply and demand in for <br> scenario {}.".format(
-                scenario
-            ),
-            yaxis=dict(
-                title="Energy in MWh",
-                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
-                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-            ),
-            yaxis2=dict(
-                title="Energy in MWh",
-                overlaying="y",
-                rangemode="tozero",
-                autorange=True,
-                side="right",
-                showgrid=False,
-            ),
-        )
-
-        data = []
 
         for c, val in df[scenario].iteritems():
             if c in app.profile_mapper.keys():

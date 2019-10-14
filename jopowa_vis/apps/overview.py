@@ -210,9 +210,7 @@ def save_scenario_changes(n_clicks, scenario_name, data):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    sc = os.path.join(
-        directory, scenario_name.replace(" ", "-").lower() + ".csv"
-    )
+    sc = os.path.join(directory, scenario_name + ".csv")
     if os.path.isfile(sc):
         return False, True
     else:

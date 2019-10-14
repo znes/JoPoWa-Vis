@@ -1,3 +1,5 @@
+import os
+
 from pkg_resources import resource_filename
 import dash
 import dash_bootstrap_components as dbc
@@ -32,6 +34,14 @@ app.profiles = pd.read_csv(
     index_col=0,
     parse_dates=True,
 )
+
+results_directory = os.path.join(
+    os.path.expanduser("~"), "jopowa-vis", "scenarios"
+)
+
+if not os.path.exists(results_directory):
+    os.makedirs(results_directory)
+
 
 if set(app.profiles) != set(app.profile_mapper.values()):
     raise ValueError("Missing key/values in profile mapper.")
