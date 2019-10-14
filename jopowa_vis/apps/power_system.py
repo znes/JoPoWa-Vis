@@ -3,7 +3,7 @@ import os
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 # import dash_table
 
@@ -11,7 +11,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory
-from jopowa_vis.apps import calculations
+from jopowa_vis.apps import calculations, optimization
 
 # card for hourly production --------------------------------------------------
 hourly_power_graph = dbc.Card(
@@ -38,14 +38,46 @@ hourly_power_graph = dbc.Card(
                             width=4,
                         ),
                     ]
-                )
+                ),
+                dbc.Row(
+                    [
+                        dbc.Button("Open modal", id="open"),
+                        dbc.Modal(
+                            [
+                                dbc.ModalHeader("Info"),
+                                dbc.ModalBody("Computation done."),
+                                dbc.ModalFooter(
+                                    dbc.Button(
+                                        "Close",
+                                        id="close",
+                                        className="ml-auto",
+                                    )
+                                ),
+                            ],
+                            id="modal",
+                        ),
+                    ]
+                ),
             ]
         ),
     ]
 )
 
-
 layout = html.Div([hourly_power_graph])
+
+
+@app.callback(
+    Output("modal", "is_open"),
+    [Input("open", "n_clicks"), Input("close", "n_clicks")],
+    [State("modal", "is_open"), State("scenario-select-id", "value")],
+)
+def toggle_modal(n1, n2, is_open, scenario):
+    if scenario is not None:
+        # optimization.compute(scenario)
+        if n1 or n2:
+            return not is_open
+        else:
+            return is_open
 
 
 @app.callback(
@@ -157,6 +189,42 @@ def display_hourly_graph(rows, scenario):
 def display_aggregated_supply_demand_graph(data, scenario):
     if scenario == "" or scenario is None:
         return {}
+    elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
+        df = pd.read_csv(
+            os.path.join(results_directory, scenario + ".csv"),
+            parse_dates=True,
+            index_col=0,
+        )
+        agg = df[df > 0].sum() / 1e6  # -> TWh
+        agg[["demand", "excess"]] = agg[["demand", "excess"]].multiply(-1)
+
+        layout = go.Layout(
+            barmode="relative",
+            title="Aggregated Supply and demand for <br> {} scenario".format(
+                scenario
+            ),
+            width=400,
+            yaxis=dict(
+                title="Energy in TWh",
+                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
+                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
+            ),
+        )
+
+        data = [
+            go.Bar(
+                x=row.index,
+                y=row.values,
+                text=[v.round(1) for v in row.values],
+                textposition="auto",
+                name=idx,
+                marker=dict(color=app.color_dict.get(idx.lower(), "gray")),
+            )
+            for idx, row in agg.to_frame().T.iteritems()
+        ]
+
+        return {"data": data, "layout": layout}
+
     else:
         df = pd.DataFrame(data)
 
