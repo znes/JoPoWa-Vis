@@ -5,8 +5,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-# import dash_table
-
+import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -68,7 +67,9 @@ layout = html.Div([hourly_power_graph])
 )
 def toggle_modal(n1, n2, is_open, scenario):
     if scenario is not None:
-        # optimization.compute(scenario)
+        if n1 and not n2:
+            p = mp.Pool(1)
+            p.map(optimization.compute, [scenario])
         if n1 or n2:
             return not is_open
         else:

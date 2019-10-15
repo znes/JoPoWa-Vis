@@ -6,11 +6,12 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table
 
+import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
 
-from jopowa_vis.app import app
-from jopowa_vis.apps import calculations
+from jopowa_vis.app import app, results_directory
+from jopowa_vis.apps import calculations, optimization
 
 import io
 import base64
@@ -84,8 +85,8 @@ def update_output(n_clicks, contents, filename, value, existing_data, existing_c
     return (
         df.to_dict("records"),
         [
-            {"id": value, "name": value, "renamable": False, "deletable": True}
-            for value in df.columns
+            {"id": col, "name": col, "renamable": False, "deletable": True}
+            for col in df.columns
         ],
     )
 
@@ -165,11 +166,8 @@ safe_scenarios = dbc.Row(
             id="form",
             children=[
                 dbc.Label("Save Scenarios"),
-                dbc.Input(id="new-scenarios", type="text", value=""),
-                dbc.FormText("Enter new scenario set name..."),
-                dbc.FormFeedback("Scenario set saved!", valid=True),
-                dbc.FormFeedback("Scenario set name exists!", valid=False),
-                dbc.Button("Save Changes", id="button"),
+                dbc.Button("Save Changes", id="save-button", n_clicks=0),
+                html.Div(id="save-output")
             ],
         )
     ]
@@ -180,26 +178,27 @@ layout = html.Div([upload, table, plots, safe_scenarios])
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
-    [Output("new-scenarios", "valid"), Output("new-scenarios", "invalid")],
-    [Input("button", "n_clicks")],
-    state=[State("new-scenarios", "value"), State("scenario-table-technology", "data")],
+    Output("save-output", "children"),
+    [Input("save-button", "n_clicks")],
+    state=[State("scenario-table-technology", "data")],
 )
-def save_scenario_changes(n_clicks, scenario_set, data):
-    df = pd.DataFrame(data).set_index("Technology")
+def save_scenario_changes(n_clicks, data):
+    if n_clicks > 0:
+        df = pd.DataFrame(data).set_index("Technology")
 
-    directory = os.path.join(
-        os.path.expanduser("~"), "jopowa-vis", "scenarios", scenario_set
-    )
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    sc = os.path.join(directory, "capacity.csv")
-    if os.path.isfile(sc):
-        return False, True
-    else:
+        sc = os.path.join(results_directory, "capacity.csv")
+        # if os.path.isfile(sc):
+        #     return False, True
+        # else:
         df.to_csv(sc)
-        return True, False
+
+        p = mp.Pool(5)
+
+        p.map(optimization.compute, [c for c in df.columns])
+
+        return "Saved and computed"
+    else:
+        return ""
 
 
 # stacked capacity plot -------------------------------------------------------

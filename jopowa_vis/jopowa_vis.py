@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from jopowa_vis.app import app, config
-from jopowa_vis.apps import start_page, overview, power_system, power_water_system
+from jopowa_vis.apps import start_page, overview, power_system
 
 
 app.layout = html.Div(
