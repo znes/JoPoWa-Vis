@@ -28,23 +28,23 @@ From sources
 
 The sources for JoPoWa-Vis can be downloaded from the `Github repo`_.
 
-You can either clone the public repository:
+You can clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/znes/jopowa-vis
+    $ git clone git://github.com/znes/JoPoWa-vis
 
-Or download the `tarball`_:
 
-.. code-block:: console
-
-    $ curl -OJL https://github.com/znes/jopowa-vis/tarball/master
-
-Once you have a copy of the source, you can install it with:
+Once you have a copy of the source, you can install it by going to
+the root directory of the package and install using the `requirements.txt`:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ cd JoPoWa-Vis
+    $ git checkout dev
+    $ pip install -r requirements.txt
+    $ pip install -e .
+
 
 
 .. _Github repo: https://github.com/znes/jopowa-vis
