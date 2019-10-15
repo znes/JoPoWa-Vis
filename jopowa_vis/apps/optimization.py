@@ -18,9 +18,9 @@ def compute(
 ):
     """
     """
-    data = pd.read_csv(
-        os.path.join(input_datapath, "capacity/mena-select-scenarios.csv")
-    ).set_index("Technology")
+    data = pd.read_csv(os.path.join(results_directory, "capacity.csv")).set_index(
+        "Technology"
+    )
     data = data[scenario]
     data.index = [i.lower() for i in data.index]
 
@@ -58,9 +58,7 @@ def compute(
     )
 
     units = [
-        u
-        for u in data.index
-        if u in carrier_cost.index.get_level_values("carrier")
+        u for u in data.index if u in carrier_cost.index.get_level_values("carrier")
     ]
 
     storages = ["storage"]
@@ -90,18 +88,14 @@ def compute(
         else:
             return (0, 0)
 
-    m.p = Var(
-        timesteps, units, within=NonNegativeReals, bounds=max_capacity_rule
-    )
+    m.p = Var(timesteps, units, within=NonNegativeReals, bounds=max_capacity_rule)
 
     m.excess = Var(timesteps, ["excess"], within=NonNegativeReals)
+    m.shortage = Var(timesteps, ["shortage"], within=NonNegativeReals)
 
     m.p_storage = Var(timesteps, storages, within=Reals)
     m.c_storage = Var(
-        timesteps,
-        storages,
-        within=NonNegativeReals,
-        bounds=(0, data["storage"] * 6),
+        timesteps, storages, within=NonNegativeReals, bounds=(0, data["storage"] * 6)
     )
     for s in storages:
         m.c_storage[timesteps[0], s].value = (
@@ -113,8 +107,7 @@ def compute(
         m.c_storage[timesteps[0], s].fix()
         for t in timesteps:
             m.c_storage[t, s].setub(
-                data[s]
-                * float(technology.loc["storage_capacity", "lithium"].value)
+                data[s] * float(technology.loc["storage_capacity", "lithium"].value)
             )
             m.p_storage[t, s].setub(data[s])
             m.p_storage[t, s].setlb(-data[s])
@@ -126,8 +119,7 @@ def compute(
         else:
             expr += (
                 m.c_storage[t, s]
-                == m.c_storage[t - pd.DateOffset(hours=1), s]
-                - m.p_storage[t, s]
+                == m.c_storage[t - pd.DateOffset(hours=1), s] - m.p_storage[t, s]
             )
         return expr
 
@@ -138,6 +130,7 @@ def compute(
         return (
             sum(m.p[t, u] for u in units)
             + sum(m.p_storage[t, s] for s in storages)
+            + m.shortage[t, "shortage"]
             == demand[t] - sum(volatile.loc[t]) + m.excess[t, "excess"]
         )
 
@@ -149,6 +142,7 @@ def compute(
         expr += sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
         expr += sum(m.p[t, u] * fuel_cost[u] for t in timesteps for u in units)
         expr += sum(m.p[t, u] * co2_cost[u] for t in timesteps for u in units)
+        expr += sum(m.shortage[t, "shortage"] * 3000 for t in timesteps)
         return expr
 
     m.costs = Objective(sense=minimize, rule=obj_rule)
@@ -164,9 +158,7 @@ def compute(
     results = {
         var.name: pd.Series(
             {index: var[index].value for index in var},
-            index=pd.MultiIndex.from_tuples(
-                var, names=("timestep", "carrier")
-            ),
+            index=pd.MultiIndex.from_tuples(var, names=("timestep", "carrier")),
         ).unstack("carrier")
         for var in m.component_objects(Var)
     }
@@ -177,6 +169,7 @@ def compute(
             results["p"],
             results["p_storage"],
             results["excess"],
+            results["shortage"],
             volatile,
             demand,
         ],

@@ -51,10 +51,7 @@ def parse_contents(contents, filename):
         Output("scenario-table-technology", "data"),
         Output("scenario-table-technology", "columns"),
     ],
-    [
-        Input("add-column-button", "n_clicks"),
-        Input("datatable-upload", "contents"),
-    ],
+    [Input("add-column-button", "n_clicks"), Input("datatable-upload", "contents")],
     [
         State("datatable-upload", "filename"),
         State("add-column-input", "value"),
@@ -62,10 +59,7 @@ def parse_contents(contents, filename):
         State("scenario-table-technology", "columns"),
     ],
 )
-def update_output(
-    n_clicks, contents, filename, value, existing_data, existing_columns
-):
-
+def update_output(n_clicks, contents, filename, value, existing_data, existing_columns):
     # need to return a valid column is callback is called
     if existing_columns is None:
         return [{}], [{"id": "Technology", "name": "Technology"}]
@@ -114,13 +108,9 @@ table = dbc.Card(
                                     [
                                         dbc.Label("Add scenario"),
                                         dbc.Input(
-                                            id="add-column-input",
-                                            type="text",
-                                            value="",
+                                            id="add-column-input", type="text", value=""
                                         ),
-                                        dbc.FormText(
-                                            "Please enter scenario name..."
-                                        ),
+                                        dbc.FormText("Please enter scenario name..."),
                                         dbc.Button(
                                             "Add column",
                                             id="add-column-button",
@@ -145,10 +135,7 @@ plots = dbc.Card(
             [
                 dbc.Row(
                     [
-                        dbc.Col(
-                            [dcc.Graph(id="scenario-residual-load-plot")],
-                            width=6,
-                        ),
+                        dbc.Col([dcc.Graph(id="scenario-residual-load-plot")], width=6),
                         dbc.Col(
                             [
                                 dcc.Graph(
@@ -195,22 +182,19 @@ layout = html.Div([upload, table, plots, safe_scenarios])
 @app.callback(
     [Output("new-scenarios", "valid"), Output("new-scenarios", "invalid")],
     [Input("button", "n_clicks")],
-    state=[
-        State("new-scenarios", "value"),
-        State("scenario-table-technology", "data"),
-    ],
+    state=[State("new-scenarios", "value"), State("scenario-table-technology", "data")],
 )
-def save_scenario_changes(n_clicks, scenario_name, data):
+def save_scenario_changes(n_clicks, scenario_set, data):
     df = pd.DataFrame(data).set_index("Technology")
 
     directory = os.path.join(
-        os.path.expanduser("~"), "jopowa-vis", "scenarios"
+        os.path.expanduser("~"), "jopowa-vis", "scenarios", scenario_set
     )
 
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    sc = os.path.join(directory, scenario_name + ".csv")
+    sc = os.path.join(directory, "capacity.csv")
     if os.path.isfile(sc):
         return False, True
     else:
@@ -252,9 +236,7 @@ def display_output(data, columns):
                 x=df.columns,
                 y=df.loc["Demand"].values,
                 marker=dict(
-                    color="Pink",
-                    size=12,
-                    line=dict(color="DarkSlateGrey", width=2),
+                    color="Pink", size=12, line=dict(color="DarkSlateGrey", width=2)
                 ),
                 yaxis="y2",
             )
@@ -303,9 +285,7 @@ def display_timeseries(data, scenarios):
     residual_load = {}
     for c in df.columns:
         residual_load[c] = (
-            calculations.timeseries(df[c])["RL"]
-            .sort_values(ascending=False)
-            .values
+            calculations.timeseries(df[c])["RL"].sort_values(ascending=False).values
         )
 
     return {

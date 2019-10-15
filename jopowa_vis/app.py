@@ -32,9 +32,7 @@ app.profiles = pd.read_csv(
     parse_dates=True,
 )
 
-results_directory = os.path.join(
-    os.path.expanduser("~"), "jopowa-vis", "scenarios"
-)
+results_directory = os.path.join(os.path.expanduser("~"), "jopowa-vis", "results")
 
 if not os.path.exists(results_directory):
     os.makedirs(results_directory)

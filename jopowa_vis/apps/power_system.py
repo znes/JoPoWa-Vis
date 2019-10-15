@@ -22,40 +22,35 @@ hourly_power_graph = dbc.Card(
                 dbc.Row(
                     [
                         dbc.Col(
-                            [
-                                dcc.Graph(
-                                    id="hourly-production-graph", figure={}
-                                )
-                            ],
+                            [dcc.Graph(id="hourly-production-graph", figure={})],
                             width=8,
                         ),
                         dbc.Col(
-                            [
-                                dcc.Graph(
-                                    id="supply_demand_aggr_graph", figure={}
-                                )
-                            ],
+                            [dcc.Graph(id="supply_demand_aggr_graph", figure={})],
                             width=4,
                         ),
                     ]
                 ),
                 dbc.Row(
                     [
-                        dbc.Button("Open modal", id="open"),
-                        dbc.Modal(
+                        dbc.Col(
                             [
-                                dbc.ModalHeader("Info"),
-                                dbc.ModalBody("Computation done."),
-                                dbc.ModalFooter(
-                                    dbc.Button(
-                                        "Close",
-                                        id="close",
-                                        className="ml-auto",
-                                    )
+                                dbc.Button("Compute", id="open"),
+                                dbc.Modal(
+                                    [
+                                        dbc.ModalHeader("Info"),
+                                        dbc.ModalBody("Computation done."),
+                                        dbc.ModalFooter(
+                                            dbc.Button(
+                                                "Close", id="close", className="ml-auto"
+                                            )
+                                        ),
+                                    ],
+                                    id="modal",
                                 ),
                             ],
-                            id="modal",
-                        ),
+                            width={"order": "last", "width": 2, "style": "primary"},
+                        )
                     ]
                 ),
             ]
@@ -82,19 +77,14 @@ def toggle_modal(n1, n2, is_open, scenario):
 
 @app.callback(
     Output("hourly-production-graph", "figure"),
-    [
-        Input("scenario-table-technology", "data"),
-        Input("scenario-select-id", "value"),
-    ],
+    [Input("scenario-table-technology", "data"), Input("scenario-select-id", "value")],
 )
 def display_hourly_graph(rows, scenario):
     """
     """
     layout = go.Layout(
         barmode="stack",
-        title="Hourly supply and demand in for <br> scenario {}.".format(
-            scenario
-        ),
+        title="Hourly supply and demand in for <br> scenario {}.".format(scenario),
         yaxis=dict(
             title="Energy in MWh",
             titlefont=dict(size=16, color="rgb(107, 107, 107)"),
@@ -129,7 +119,21 @@ def display_hourly_graph(rows, scenario):
                         x=df.index,
                         y=df[c],
                         name=c,
-                        line=dict(width=3, color="darkred"),
+                        line=dict(
+                            width=3, color=app.color_dict.get(c.lower(), "black")
+                        ),
+                    )
+                )
+            elif c == "excess":
+                data.append(
+                    go.Scatter(
+                        x=df.index,
+                        y=df[c] * -1,
+                        name=c,
+                        stackgroup="negative",
+                        line=dict(
+                            width=0, color=app.color_dict.get(c.lower(), "black")
+                        ),
                     )
                 )
             elif "storage" in c:
@@ -140,8 +144,7 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="positive",
                         line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
+                            width=0, color=app.color_dict.get(c.lower(), "black")
                         ),
                         showlegend=True,
                     )
@@ -153,8 +156,7 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="negative",
                         line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
+                            width=0, color=app.color_dict.get(c.lower(), "black")
                         ),
                         showlegend=False,
                     )
@@ -168,8 +170,7 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="positive",
                         line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
+                            width=0, color=app.color_dict.get(c.lower(), "black")
                         ),
                     )
                 )
@@ -181,10 +182,7 @@ def display_hourly_graph(rows, scenario):
 
 @app.callback(
     Output("supply_demand_aggr_graph", "figure"),
-    [
-        Input("scenario-table-technology", "data"),
-        Input("scenario-select-id", "value"),
-    ],
+    [Input("scenario-table-technology", "data"), Input("scenario-select-id", "value")],
 )
 def display_aggregated_supply_demand_graph(data, scenario):
     if scenario == "" or scenario is None:
@@ -197,12 +195,11 @@ def display_aggregated_supply_demand_graph(data, scenario):
         )
         agg = df[df > 0].sum() / 1e6  # -> TWh
         agg[["demand", "excess"]] = agg[["demand", "excess"]].multiply(-1)
+        agg["storage-consumption"] = df["storage"].clip(upper=0).sum() / 1e6  # -> TWh
 
         layout = go.Layout(
             barmode="relative",
-            title="Aggregated Supply and demand for <br> {} scenario".format(
-                scenario
-            ),
+            title="Aggregated Supply and demand for <br> {} scenario".format(scenario),
             width=400,
             yaxis=dict(
                 title="Energy in TWh",
@@ -211,17 +208,29 @@ def display_aggregated_supply_demand_graph(data, scenario):
             ),
         )
 
-        data = [
-            go.Bar(
-                x=row.index,
-                y=row.values,
-                text=[v.round(1) for v in row.values],
-                textposition="auto",
-                name=idx,
-                marker=dict(color=app.color_dict.get(idx.lower(), "gray")),
+        mapper = {"storage-consumption": "storage"}
+        data = []
+
+        for idx, row in agg.to_frame().T.iteritems():
+            if idx == "storage-consumption":
+                legend = False
+            else:
+                legend = True
+            data.append(
+                go.Bar(
+                    x=row.index,
+                    y=row.values,
+                    text=[v.round(1) for v in row.values],
+                    hovertext=[v.round(1) for v in row.values],
+                    hoverinfo="text",
+                    textposition="auto",
+                    showlegend=legend,
+                    name=mapper.get(idx, idx),
+                    marker=dict(
+                        color=app.color_dict.get(mapper.get(idx, idx).lower(), "gray")
+                    ),
+                )
             )
-            for idx, row in agg.to_frame().T.iteritems()
-        ]
 
         return {"data": data, "layout": layout}
 
@@ -244,9 +253,7 @@ def display_aggregated_supply_demand_graph(data, scenario):
 
         layout = go.Layout(
             barmode="relative",
-            title="Aggregated Supply and demand for <br> {} scenario".format(
-                scenario
-            ),
+            title="Aggregated Supply and demand for <br> {} scenario".format(scenario),
             width=400,
             yaxis=dict(
                 title="Energy in TWh",

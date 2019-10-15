@@ -25,7 +25,8 @@ geothermal= "darkred"
 csp = "orange"
 other = "gray"
 demand = "darkblue"
-excess = "pink"
+excess = "darkgreen"
+shortage = "darkred"
 
 [paths]
 profiles = "data/jordan-input-data/profile/energy-water-profile.csv"

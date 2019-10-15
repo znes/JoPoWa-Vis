@@ -4,12 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from jopowa_vis.app import app, config
-from jopowa_vis.apps import (
-    start_page,
-    overview,
-    power_system,
-    power_water_system,
-)
+from jopowa_vis.apps import start_page, overview, power_system, power_water_system
 
 
 app.layout = html.Div(
@@ -25,8 +20,7 @@ index_page = dbc.Card(
                         dbc.Col(
                             [
                                 html.H2(
-                                    config["headings"]["title"],
-                                    className="card-title",
+                                    config["headings"]["title"], className="card-title"
                                 ),
                                 html.H3(config["headings"]["sub-title"]),
                             ]
@@ -72,8 +66,7 @@ index_page = dbc.Card(
                                     [
                                         dbc.Label("Select scenario"),
                                         dcc.Dropdown(
-                                            id="scenario-select-id",
-                                            className="mb-3",
+                                            id="scenario-select-id", className="mb-3"
                                         ),
                                     ]
                                 )
@@ -86,11 +79,7 @@ index_page = dbc.Card(
                     [
                         dbc.Tab(start_page.map, label="Start Page"),
                         dbc.Tab(overview.layout, label="Scenario Overview"),
-                        dbc.Tab(power_system.layout, label="Power System"),
-                        dbc.Tab(
-                            power_water_system.layout,
-                            label="Power & Water System",
-                        ),
+                        dbc.Tab(power_system.layout, label="Power System")
                     ]
                 ),
             ]
