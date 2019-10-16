@@ -49,7 +49,10 @@ def aggregated_supply_demand(results_directory, scenarios):
                 x=row.index,
                 y=row.values,
                 text=[v.round(1) for v in row.values],
-                hovertext=[", ".join([str(v.round(1)), mapper.get(idx, idx)]) for v in row.values],
+                hovertext=[
+                    ", ".join([str(v.round(1)), mapper.get(idx, idx)])
+                    for v in row.values
+                ],
                 hoverinfo="text",
                 textposition="auto",
                 showlegend=legend,
@@ -61,5 +64,50 @@ def aggregated_supply_demand(results_directory, scenarios):
                 ),
             )
         )
+
+    return {"data": data, "layout": layout}
+
+
+def empty_plot(label_annotation):
+    """
+    Returns an empty plot with a centered text.
+    """
+
+    trace1 = go.Scatter(x=[], y=[])
+
+    data = [trace1]
+
+    layout = go.Layout(
+        showlegend=False,
+        xaxis=dict(
+            autorange=True,
+            showgrid=False,
+            zeroline=False,
+            showline=False,
+            ticks="",
+            showticklabels=False,
+        ),
+        yaxis=dict(
+            autorange=True,
+            showgrid=False,
+            zeroline=False,
+            showline=False,
+            ticks="",
+            showticklabels=False,
+        ),
+        annotations=[
+            dict(
+                x=0,
+                y=0,
+                xref="x",
+                yref="y",
+                text=label_annotation,
+                showarrow=False,
+                arrowhead=0,
+                ax=0,
+                ay=0,
+            )
+        ],
+    )
 
     return {"data": data, "layout": layout}

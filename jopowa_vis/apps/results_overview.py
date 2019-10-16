@@ -9,33 +9,43 @@ from jopowa_vis.app import app, results_directory
 from jopowa_vis.apps import plots
 
 row = dbc.Row(
-    [       dbc.FormGroup(
+    [
+        dbc.FormGroup(
             [
-                dbc.Label("Select Sceanrio Set"),
-                dcc.Dropdown(
-                    id="directory-select-id",
-                    className="mb-3",
+                dbc.Label("Select Scenario Set"),
+                dcc.Dropdown(id="directory-select-id", className="mb-3"),
+                dbc.Button(
+                    "Update list",
+                    id="update-dirlist",
+                    n_clicks=0,
+                    color="secondary",
                 ),
             ]
         ),
-        dbc.Col([
-            dcc.Graph(
-                id="supply_demand_aggr_graph_all", figure={}
-            )
-        ]),
+        dbc.Col([dcc.Graph(id="supply_demand_aggr_graph_all", figure={})]),
     ]
 )
 
 layout = html.Div([row])
 
+
 @app.callback(
     Output("supply_demand_aggr_graph_all", "figure"),
-    [
-        Input("directory-select-id", "value"),
-    ],
+    [Input("directory-select-id", "value")],
 )
-def display_aggregated_supply_demand_graph(directory):
-    return {}
+def display_aggregated_supply_demand_graph(scenario_directory):
+    if scenario_directory is None:
+        return plots.empty_plot("")
+    else:
+        dir = os.path.join(results_directory, scenario_directory)
+        scenarios = [
+            s.replace(".csv", "")
+            for s in os.listdir(dir)
+            if s.endswith(".csv")
+        ]
+        plot = plots.aggregated_supply_demand(dir, scenarios)
+        plot["layout"].update({"width": 800})
+        return plot
 
     # path = os.path.exists(os.path.join(results_directory, directory))
     # if os.path.exists(path):
@@ -47,14 +57,16 @@ def display_aggregated_supply_demand_graph(directory):
 
 @app.callback(
     Output("directory-select-id", "options"),
-    [Input("button", "columns")],
+    [Input("update-dirlist", "n_clicks")],
 )
-def update_scenario_select(columns):
-    if columns is None:
-        return None
+def update_dirlist_select(n_clicks):
+    if n_clicks > 0:
+        items = os.listdir(results_directory)
 
-    return [
-        {"label": c["id"], "value": c["name"]}
-        for c in columns
-        if c["id"] != "Technology"
-    ]
+        return [
+            {"label": i, "value": i}
+            for i in items
+            if os.path.isdir(os.path.join(results_directory, i))
+        ]
+    else:
+        return []

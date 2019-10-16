@@ -117,8 +117,8 @@ def compute(
     )
     for s in storages:
         m.c_storage[timesteps[0], s].value = (
-            initial_storage_level * data["storage capacity"])
-
+            initial_storage_level * data["storage capacity"]
+        )
 
         m.c_storage[timesteps[0], s].fix()
         for t in timesteps:
@@ -202,13 +202,13 @@ def compute(
 
 if __name__ == "__main__":
     import multiprocessing as mp
-    compute("No Imports")
-    # scenarios = [
-    #     "Mix incl. Nuclear",
-    #     "Current plans + Gas",
-    #     "RE + Gas",
-    #     "Medium RE + Gas",
-    #     "No Imports",
-    # ]
-    # p = mp.Pool(5)
-    # p.map(compute, scenarios)
+
+    scenarios = [
+        "Mix incl. Nuclear",
+        "Current plans + Gas",
+        "RE + Gas",
+        "Medium RE + Gas",
+        "No Imports",
+    ]
+    p = mp.Pool(5)
+    p.map(compute, scenarios)
