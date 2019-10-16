@@ -9,7 +9,7 @@ import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
 
-from jopowa_vis.app import app, results_directory
+from jopowa_vis.app import app, results_directory, config
 from jopowa_vis.apps import calculations, optimization
 
 # card for hourly production --------------------------------------------------
@@ -18,37 +18,43 @@ hourly_power_graph = dbc.Card(
         dbc.CardHeader(["Hourly Power Supply and Demand"]),
         dbc.CardBody(
             [
+                dbc.Alert("", id="alert", dismissable=True, is_open=False),
                 dbc.Row(
                     [
                         dbc.Col(
-                            [dcc.Graph(id="hourly-production-graph", figure={})],
+                            [
+                                dcc.Graph(
+                                    id="hourly-production-graph", figure={}
+                                )
+                            ],
                             width=8,
                         ),
                         dbc.Col(
-                            [dcc.Graph(id="supply_demand_aggr_graph", figure={})],
+                            [
+                                dcc.Graph(
+                                    id="supply_demand_aggr_graph", figure={}
+                                )
+                            ],
                             width=4,
                         ),
                     ]
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(
+                        dbc.Form(
                             [
-                                dbc.Button("Compute", id="open"),
-                                dbc.Modal(
+                                dbc.FormGroup(
                                     [
-                                        dbc.ModalHeader("Info"),
-                                        dbc.ModalBody("Computation done."),
-                                        dbc.ModalFooter(
-                                            dbc.Button(
-                                                "Close", id="close", className="ml-auto"
-                                            )
-                                        ),
-                                    ],
-                                    id="modal",
-                                ),
+                                        dbc.Button(
+                                            "Compute",
+                                            id="open",
+                                            color="primary",
+                                            n_clicks=0,
+                                        )
+                                    ]
+                                )
                             ],
-                            width={"order": "last", "width": 2, "style": "primary"},
+                            inline=True,
                         )
                     ]
                 ),
@@ -61,43 +67,52 @@ layout = html.Div([hourly_power_graph])
 
 
 @app.callback(
-    Output("modal", "is_open"),
-    [Input("open", "n_clicks"), Input("close", "n_clicks")],
-    [State("modal", "is_open"), State("scenario-select-id", "value")],
+    [
+        Output("alert", "children"),
+        Output("alert", "is_open"),
+        Output("alert", "color"),
+    ],
+    [Input("open", "n_clicks")],
+    [State("scenario-select-id", "value")],
 )
-def toggle_modal(n1, n2, is_open, scenario):
-    if scenario is not None:
-        if n1 and not n2:
+def compute(n, scenario):
+    if n > 0:
+        if scenario is not None:
             p = mp.Pool(1)
-            p.map(optimization.compute, [scenario])
-        if n1 or n2:
-            return not is_open
+            x = p.map(optimization.compute, [scenario])
+            # x is an array due to mapping
+            if False in x:
+                return (
+                    "Computation not possible. Did you save the scenario set?",
+                    True,
+                    "danger",
+                )
+            else:
+                return "Computation done.", True, "success"
         else:
-            return is_open
+            return "No scenario selected.", True, "warning"
+    return "", True, ""
 
 
 @app.callback(
     Output("hourly-production-graph", "figure"),
-    [Input("scenario-table-technology", "data"), Input("scenario-select-id", "value")],
+    [
+        Input("scenario-table-technology", "data"),
+        Input("scenario-select-id", "value"),
+    ],
 )
 def display_hourly_graph(rows, scenario):
     """
     """
     layout = go.Layout(
         barmode="stack",
-        title="Hourly supply and demand in for <br> scenario {}.".format(scenario),
+        title="Hourly supply and demand in for <br> scenario {}.".format(
+            scenario
+        ),
         yaxis=dict(
-            title="Energy in MWh",
+            title="Supply and Demand in {}".format(config["units"]["power"]),
             titlefont=dict(size=16, color="rgb(107, 107, 107)"),
             tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-        ),
-        yaxis2=dict(
-            title="Energy in MWh",
-            overlaying="y",
-            rangemode="tozero",
-            autorange=True,
-            side="right",
-            showgrid=False,
         ),
     )
 
@@ -121,7 +136,8 @@ def display_hourly_graph(rows, scenario):
                         y=df[c],
                         name=c,
                         line=dict(
-                            width=3, color=app.color_dict.get(c.lower(), "black")
+                            width=3,
+                            color=app.color_dict.get(c.lower(), "black"),
                         ),
                     )
                 )
@@ -133,7 +149,8 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="negative",
                         line=dict(
-                            width=0, color=app.color_dict.get(c.lower(), "black")
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
                         ),
                     )
                 )
@@ -145,7 +162,8 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="positive",
                         line=dict(
-                            width=0, color=app.color_dict.get(c.lower(), "black")
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
                         ),
                         showlegend=True,
                     )
@@ -157,7 +175,8 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="negative",
                         line=dict(
-                            width=0, color=app.color_dict.get(c.lower(), "black")
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
                         ),
                         showlegend=False,
                     )
@@ -171,7 +190,8 @@ def display_hourly_graph(rows, scenario):
                         name=c,
                         stackgroup="positive",
                         line=dict(
-                            width=0, color=app.color_dict.get(c.lower(), "black")
+                            width=0,
+                            color=app.color_dict.get(c.lower(), "black"),
                         ),
                     )
                 )
@@ -183,7 +203,10 @@ def display_hourly_graph(rows, scenario):
 
 @app.callback(
     Output("supply_demand_aggr_graph", "figure"),
-    [Input("scenario-table-technology", "data"), Input("scenario-select-id", "value")],
+    [
+        Input("scenario-table-technology", "data"),
+        Input("scenario-select-id", "value"),
+    ],
 )
 def display_aggregated_supply_demand_graph(data, scenario):
     if scenario == "" or scenario is None:
@@ -194,13 +217,17 @@ def display_aggregated_supply_demand_graph(data, scenario):
             parse_dates=True,
             index_col=0,
         )
-        agg = df[df > 0].sum() / 1e6  # -> TWh
+        agg = df[df > 0].sum() / 1e3  # -> TWh
         agg[["demand", "excess"]] = agg[["demand", "excess"]].multiply(-1)
-        agg["storage-consumption"] = df["storage"].clip(upper=0).sum() / 1e6  # -> TWh
+        agg["storage-consumption"] = (
+            df["storage"].clip(upper=0).sum() / 1e3
+        )  # -> TWh
 
         layout = go.Layout(
             barmode="relative",
-            title="Aggregated Supply and demand for <br> {} scenario".format(scenario),
+            title="Aggregated Supply and demand for <br> {} scenario".format(
+                scenario
+            ),
             width=400,
             yaxis=dict(
                 title="Energy in TWh",
@@ -228,51 +255,13 @@ def display_aggregated_supply_demand_graph(data, scenario):
                     showlegend=legend,
                     name=mapper.get(idx, idx),
                     marker=dict(
-                        color=app.color_dict.get(mapper.get(idx, idx).lower(), "gray")
+                        color=app.color_dict.get(
+                            mapper.get(idx, idx).lower(), "gray"
+                        )
                     ),
                 )
             )
 
         return {"data": data, "layout": layout}
-
     else:
-        df = pd.DataFrame(data)
-
-        if scenario not in df.columns:
-            return {}
-        elif df[scenario].isnull().any():
-            return {}
-
-        df.set_index("Technology", inplace=True)
-
-        timeseries = calculations.timeseries(df[scenario])
-
-        agg = (timeseries.sum() / 1e6).drop(["RL"])  # MWh -> GWh
-        # convert to negative for plotting
-
-        agg[["Demand", "Excess"]] = agg[["Demand", "Excess"]].multiply(-1)
-
-        layout = go.Layout(
-            barmode="relative",
-            title="Aggregated Supply and demand for <br> {} scenario".format(scenario),
-            width=400,
-            yaxis=dict(
-                title="Energy in TWh",
-                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
-                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-            ),
-        )
-
-        data = [
-            go.Bar(
-                x=row.index,
-                y=row.values,
-                text=[v.round(1) for v in row.values],
-                textposition="auto",
-                name=idx,
-                marker=dict(color=app.color_dict.get(idx.lower(), "gray")),
-            )
-            for idx, row in agg.to_frame().T.iteritems()
-        ]
-
-        return {"data": data, "layout": layout}
+        return {}

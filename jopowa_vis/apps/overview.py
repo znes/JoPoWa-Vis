@@ -10,7 +10,7 @@ import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
 
-from jopowa_vis.app import app, results_directory
+from jopowa_vis.app import app, results_directory, config
 from jopowa_vis.apps import calculations, optimization
 
 import io
@@ -52,7 +52,10 @@ def parse_contents(contents, filename):
         Output("scenario-table-technology", "data"),
         Output("scenario-table-technology", "columns"),
     ],
-    [Input("add-column-button", "n_clicks"), Input("datatable-upload", "contents")],
+    [
+        Input("add-column-button", "n_clicks"),
+        Input("datatable-upload", "contents"),
+    ],
     [
         State("datatable-upload", "filename"),
         State("add-column-input", "value"),
@@ -60,7 +63,9 @@ def parse_contents(contents, filename):
         State("scenario-table-technology", "columns"),
     ],
 )
-def update_output(n_clicks, contents, filename, value, existing_data, existing_columns):
+def update_output(
+    n_clicks, contents, filename, value, existing_data, existing_columns
+):
     # need to return a valid column is callback is called
     if existing_columns is None:
         return [{}], [{"id": "Technology", "name": "Technology"}]
@@ -109,9 +114,13 @@ table = dbc.Card(
                                     [
                                         dbc.Label("Add scenario"),
                                         dbc.Input(
-                                            id="add-column-input", type="text", value=""
+                                            id="add-column-input",
+                                            type="text",
+                                            value="",
                                         ),
-                                        dbc.FormText("Please enter scenario name..."),
+                                        dbc.FormText(
+                                            "Please enter scenario name..."
+                                        ),
                                         dbc.Button(
                                             "Add column",
                                             id="add-column-button",
@@ -136,7 +145,10 @@ plots = dbc.Card(
             [
                 dbc.Row(
                     [
-                        dbc.Col([dcc.Graph(id="scenario-residual-load-plot")], width=6),
+                        dbc.Col(
+                            [dcc.Graph(id="scenario-residual-load-plot")],
+                            width=6,
+                        ),
                         dbc.Col(
                             [
                                 dcc.Graph(
@@ -167,7 +179,7 @@ safe_scenarios = dbc.Row(
             children=[
                 dbc.Label("Save Scenarios"),
                 dbc.Button("Save Changes", id="save-button", n_clicks=0),
-                html.Div(id="save-output")
+                html.Div(id="save-output"),
             ],
         )
     ]
@@ -235,7 +247,9 @@ def display_output(data, columns):
                 x=df.columns,
                 y=df.loc["Demand"].values,
                 marker=dict(
-                    color="Pink", size=12, line=dict(color="DarkSlateGrey", width=2)
+                    color="Pink",
+                    size=12,
+                    line=dict(color="DarkSlateGrey", width=2),
                 ),
                 yaxis="y2",
             )
@@ -245,12 +259,12 @@ def display_output(data, columns):
             title="Installed capacities and demand scenarios",
             legend=dict(x=1.1, y=0),
             yaxis=dict(
-                title="Capacity in MW",
+                title="Capacity in {}".format(config["units"]["power"]),
                 titlefont=dict(size=16, color="rgb(107, 107, 107)"),
                 tickfont=dict(size=14, color="rgb(107, 107, 107)"),
             ),
             yaxis2=dict(
-                title="Demand in MWh",
+                title="Demand in TWh",
                 overlaying="y",
                 rangemode="tozero",
                 autorange=True,
@@ -271,11 +285,14 @@ def display_output(data, columns):
 )
 def display_timeseries(data, scenarios):
     df = pd.DataFrame(data)
+
     # check if dataframe is empty to avoid errors
     if df.empty:
         return {}
-
+    # fill nas to avoid errors in plots (e.g. when converting )
+    df = df.fillna(0)
     df.set_index("Technology", inplace=True)
+
     # convert to float
     for c in df.columns:
         df[c] = df[c].astype("float")
@@ -284,12 +301,23 @@ def display_timeseries(data, scenarios):
     residual_load = {}
     for c in df.columns:
         residual_load[c] = (
-            calculations.timeseries(df[c])["RL"].sort_values(ascending=False).values
+            calculations.timeseries(df[c])["RL"]
+            .sort_values(ascending=False)
+            .values
         )
 
     return {
         "data": [
             go.Scatter(name=k, x=[i for i in range(8760)], y=v)
             for k, v in residual_load.items()
-        ]
+        ],
+        "layout": go.Layout(
+            title="Sorted residual load for scenarios (duration curve)",
+            legend=dict(x=1.1, y=0),
+            yaxis=dict(
+                title="Energy in {}".format(config["units"]["energy"]),
+                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
+                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
+            ),
+        ),
     }

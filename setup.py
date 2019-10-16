@@ -46,5 +46,7 @@ setup(
     url="https://github.com/znes/jopowa_vis",
     version="0.0.1",
     zip_safe=False,
-    entry_points={"console_scripts": ["jopowa_vis = jopowa_vis.jopowa_vis:serve"]},
+    entry_points={
+        "console_scripts": ["jopowa_vis = jopowa_vis.jopowa_vis:serve"]
+    },
 )

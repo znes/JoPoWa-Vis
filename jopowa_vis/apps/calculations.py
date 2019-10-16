@@ -21,7 +21,7 @@ def timeseries(data):
             if tech in app.profile_mapper.keys()
         }
     ).set_index(app.profiles.index)
-    ts["Demand"] = ts["Demand"] * 1000
+    ts["Demand"] = ts["Demand"] * 1e3  # -> TWh
     ts["RL"] = ts["Demand"] - ts[["Wind", "PV", "CSP"]].sum(axis=1)
     ts["Other"] = ts["RL"][ts["RL"] > 0]
     ts["Excess"] = ts["RL"][ts["RL"] < 0] * -1

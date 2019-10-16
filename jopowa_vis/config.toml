@@ -14,8 +14,8 @@ Hydro = "hydro"
 Demand = "demand"
 
 [units]
-energy = "GWh"
-power = "MW"
+energy = "TWh"
+power = "GW"
 water = "Mm3"
 
 # colors will be used for plots. If not specified colors from oemof.tabular
