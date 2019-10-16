@@ -49,7 +49,7 @@ def aggregated_supply_demand(results_directory, scenarios):
                 x=row.index,
                 y=row.values,
                 text=[v.round(1) for v in row.values],
-                hovertext=[v.round(1) for v in row.values],
+                hovertext=[", ".join([str(v.round(1)), mapper.get(idx, idx)]) for v in row.values],
                 hoverinfo="text",
                 textposition="auto",
                 showlegend=legend,

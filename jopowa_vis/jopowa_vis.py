@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from jopowa_vis.app import app, config
-from jopowa_vis.apps import start_page, overview, power_system
+from jopowa_vis.apps import (start_page, overview, power_system, results_overview)
 
 
 app.layout = html.Div(
@@ -82,6 +82,7 @@ index_page = dbc.Card(
                         dbc.Tab(start_page.map, label="Start Page"),
                         dbc.Tab(overview.layout, label="Scenario Overview"),
                         dbc.Tab(power_system.layout, label="Power System"),
+                        dbc.Tab(results_overview.layout, label="Results Overview"),
                     ]
                 ),
             ]

@@ -113,21 +113,16 @@ def compute(
         timesteps,
         storages,
         within=NonNegativeReals,
-        bounds=(0, data["storage"] * 6),
+        bounds=(0, data["storage capacity"]),
     )
     for s in storages:
         m.c_storage[timesteps[0], s].value = (
-            initial_storage_level
-            * data[s]
-            * float(technology.loc["storage_capacity", "lithium"].value)
-        )
+            initial_storage_level * data["storage capacity"])
+
 
         m.c_storage[timesteps[0], s].fix()
         for t in timesteps:
-            m.c_storage[t, s].setub(
-                data[s]
-                * float(technology.loc["storage_capacity", "lithium"].value)
-            )
+            m.c_storage[t, s].setub(data["storage capacity"])
             m.p_storage[t, s].setub(data[s])
             m.p_storage[t, s].setlb(-data[s])
 
@@ -207,13 +202,13 @@ def compute(
 
 if __name__ == "__main__":
     import multiprocessing as mp
-
-    scenarios = [
-        "Mix incl. Nuclear",
-        "Current plans + Gas",
-        "RE + Gas",
-        "Medium RE + Gas",
-        "No Imports",
-    ]
-    p = mp.Pool(5)
-    p.map(compute, scenarios)
+    compute("No Imports")
+    # scenarios = [
+    #     "Mix incl. Nuclear",
+    #     "Current plans + Gas",
+    #     "RE + Gas",
+    #     "Medium RE + Gas",
+    #     "No Imports",
+    # ]
+    # p = mp.Pool(5)
+    # p.map(compute, scenarios)

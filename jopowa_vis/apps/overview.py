@@ -101,8 +101,7 @@ table = dbc.Card(
         dbc.CardHeader([]),
         dbc.CardBody(
             [
-                dbc.Row(
-                    [
+                    dbc.Row([
                         dbc.Col(
                             children=[
                                 dash_table.DataTable(
@@ -110,29 +109,31 @@ table = dbc.Card(
                                     data=[{}],
                                     editable=True,
                                 ),
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("Add scenario"),
-                                        dbc.Input(
-                                            id="add-column-input",
-                                            type="text",
-                                            value="",
-                                        ),
-                                        dbc.FormText(
-                                            "Please enter scenario name..."
-                                        ),
-                                        dbc.Button(
-                                            "Add column",
-                                            id="add-column-button",
-                                            n_clicks=0,
-                                        ),
-                                    ]
-                                ),
                             ],
                             width=6,
                         )
                     ]
-                )
+                ),
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Input(
+                            id="add-column-input",
+                            type="text",
+                            value="",
+                            placeholder="Please enter scenario name..."
+                        ),
+                        dbc.Button(
+                            "Add scenario",
+                            id="add-column-button",
+                            n_clicks=0,
+                            color="secondary"
+                        )
+                    ], width=4),
+                    dbc.Col([
+                            dbc.Button("Save Changes", id="save-button", n_clicks=0, color="primary"),
+                            html.Div(id="save-output"),
+                    ], width={"order": "last"})
+                ], justify="between")
             ]
         ),
     ]
@@ -172,20 +173,9 @@ plots = dbc.Card(
     className="mt-3",
 )
 
-safe_scenarios = dbc.Row(
-    [
-        dbc.FormGroup(
-            id="form",
-            children=[
-                dbc.Label("Save Scenarios"),
-                dbc.Button("Save Changes", id="save-button", n_clicks=0),
-                html.Div(id="save-output"),
-            ],
-        )
-    ]
-)
 
-layout = html.Div([upload, table, plots, safe_scenarios])
+
+layout = html.Div([upload, table, plots, ])
 
 
 # save scenario changes -------------------------------------------------------
@@ -234,7 +224,7 @@ def display_output(data, columns):
                 marker=dict(color=app.color_dict.get(idx.lower(), "black")),
             )
             for idx, row in df.iterrows()
-            if idx != "Demand"
+            if idx not in ["Demand", "Storage Capacity"]
         ]
         + [
             go.Scatter(
