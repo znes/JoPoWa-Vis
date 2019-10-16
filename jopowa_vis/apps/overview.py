@@ -204,10 +204,6 @@ def save_scenario_changes(n_clicks, data):
         # else:
         df.to_csv(sc)
 
-        p = mp.Pool(5)
-
-        p.map(optimization.compute, [c for c in df.columns])
-
         return "Saved and computed"
     else:
         return ""

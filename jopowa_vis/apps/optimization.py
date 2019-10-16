@@ -162,7 +162,7 @@ def compute(
         expr += sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
         expr += sum(m.p[t, u] * fuel_cost[u] for t in timesteps for u in units)
         expr += sum(m.p[t, u] * co2_cost[u] for t in timesteps for u in units)
-        expr += sum(m.shortage[t, "shortage"] * 3000 for t in timesteps)
+        expr += sum(m.shortage[t, "shortage"] * 3000e3 for t in timesteps)
         return expr
 
     m.costs = Objective(sense=minimize, rule=obj_rule)

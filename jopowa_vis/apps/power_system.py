@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory, config
-from jopowa_vis.apps import calculations, optimization
+from jopowa_vis.apps import calculations, optimization, plots
 
 # card for hourly production --------------------------------------------------
 hourly_power_graph = dbc.Card(
@@ -212,56 +212,6 @@ def display_aggregated_supply_demand_graph(data, scenario):
     if scenario == "" or scenario is None:
         return {}
     elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
-        df = pd.read_csv(
-            os.path.join(results_directory, scenario + ".csv"),
-            parse_dates=True,
-            index_col=0,
-        )
-        agg = df[df > 0].sum() / 1e3  # -> TWh
-        agg[["demand", "excess"]] = agg[["demand", "excess"]].multiply(-1)
-        agg["storage-consumption"] = (
-            df["storage"].clip(upper=0).sum() / 1e3
-        )  # -> TWh
-
-        layout = go.Layout(
-            barmode="relative",
-            title="Aggregated Supply and demand for <br> {} scenario".format(
-                scenario
-            ),
-            width=400,
-            yaxis=dict(
-                title="Energy in TWh",
-                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
-                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-            ),
-        )
-
-        mapper = {"storage-consumption": "storage"}
-        data = []
-
-        for idx, row in agg.to_frame().T.iteritems():
-            if idx == "storage-consumption":
-                legend = False
-            else:
-                legend = True
-            data.append(
-                go.Bar(
-                    x=row.index,
-                    y=row.values,
-                    text=[v.round(1) for v in row.values],
-                    hovertext=[v.round(1) for v in row.values],
-                    hoverinfo="text",
-                    textposition="auto",
-                    showlegend=legend,
-                    name=mapper.get(idx, idx),
-                    marker=dict(
-                        color=app.color_dict.get(
-                            mapper.get(idx, idx).lower(), "gray"
-                        )
-                    ),
-                )
-            )
-
-        return {"data": data, "layout": layout}
+        return plots.aggregated_supply_demand(results_directory, [scenario])
     else:
         return {}
