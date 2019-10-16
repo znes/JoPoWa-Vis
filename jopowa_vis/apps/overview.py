@@ -6,12 +6,11 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table
 
-import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory, config
-from jopowa_vis.apps import calculations, optimization
+from jopowa_vis.apps import calculations
 
 import io
 import base64
