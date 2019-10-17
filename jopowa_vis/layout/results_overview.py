@@ -37,10 +37,13 @@ energy = dbc.Card(
                         dbc.Col(
                             [
                                 dcc.Graph(
-                                    id="supply_demand_aggr_graph_all",
-                                    figure={},
+                                    id="supply_demand_aggr_graph_all"
                                 )
                             ],
+                            width="auto",
+                        ),
+                        dbc.Col(
+                            [dcc.Graph(id="results-capacity-plot")],
                             width="auto",
                         )
                     ],
@@ -57,10 +60,10 @@ capacities = dbc.Card(
             [
                 dbc.Row(
                     [
-                        dbc.Col(
-                            [dcc.Graph(id="results-capacity-plot", figure={})],
-                            width="auto",
-                        )
+                        # dbc.Col(
+                        #     [dcc.Graph(id="results-capacity-plot", figure={})],
+                        #     width="auto",
+                        # )
                     ],
                     justify="center",
                 )
@@ -89,7 +92,7 @@ def display_aggregated_supply_demand_graph(scenario_directory):
         ]
         if scenarios:
             plot = plots.aggregated_supply_demand(dir, scenarios)
-            plot["layout"].update({"width": 1000, "height": 700})
+            plot["layout"].update({"width": 800, "height": 600})
             return plot
         else:
             return plots.empty_plot("")
@@ -109,5 +112,5 @@ def result_capacity_plot(scenario_directory):
         df = pd.read_csv(file).set_index("Technology")
         df = df.reindex(sorted(df.columns), axis=1)
         plot = plots.stacked_capacity_plot(df, config)
-        plot["layout"].update({"width": 1000, "height": 700})
+        plot["layout"].update({"width": 800, "height": 600})
         return plot
