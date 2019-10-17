@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory, config
-from jopowa_vis.apps import calculations
+from jopowa_vis.apps import calculations, plots
 
 import io
 import base64
@@ -154,7 +154,7 @@ table = dbc.Card(
 )
 
 # Scenario Plots ---------------------
-plots = dbc.Card(
+plot_card = dbc.Card(
     [
         dbc.CardBody(
             [
@@ -188,7 +188,7 @@ plots = dbc.Card(
 )
 
 
-layout = html.Div([upload, table, plots])
+layout = html.Div([upload, table, plot_card])
 
 
 # save scenario changes -------------------------------------------------------
@@ -224,54 +224,11 @@ def display_output(data, columns):
     df = pd.DataFrame(data)
     # check if dataframe is empty to avoid errors
     if df.empty:
-        return {}
+        return plots.empty_plot("")
 
     df = pd.DataFrame(data).set_index("Technology")
 
-    return {
-        "data": [
-            go.Bar(
-                name=idx,
-                x=row.index,
-                y=row.values,
-                marker=dict(color=app.color_dict.get(idx.lower(), "black")),
-            )
-            for idx, row in df.iterrows()
-            if idx not in ["Demand", "Storage Capacity"]
-        ]
-        + [
-            go.Scatter(
-                mode="markers",
-                name="Demand (el)",
-                x=df.columns,
-                y=df.loc["Demand"].values,
-                marker=dict(
-                    color="Pink",
-                    size=12,
-                    line=dict(color="DarkSlateGrey", width=2),
-                ),
-                yaxis="y2",
-            )
-        ],
-        "layout": go.Layout(
-            barmode="stack",
-            title="Installed capacities and demand scenarios",
-            legend=dict(x=1.1, y=0),
-            yaxis=dict(
-                title="Capacity in {}".format(config["units"]["power"]),
-                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
-                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-            ),
-            yaxis2=dict(
-                title="Demand in TWh",
-                overlaying="y",
-                rangemode="tozero",
-                autorange=True,
-                side="right",
-                showgrid=False,
-            ),
-        ),
-    }
+    return plots.stacked_capacity_plot(df, config)
 
 
 # residual load plot ----------------------------------------------------------

@@ -5,54 +5,84 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from jopowa_vis.app import app, results_directory
+import pandas as pd
+
+from jopowa_vis.app import app, results_directory, config
 from jopowa_vis.apps import plots
 
-row = dbc.Row(
+form = dbc.Row(
     [
-        dbc.FormGroup(
+        dbc.Col(
             [
-                dbc.Label("Select Scenario Set"),
-                dcc.Dropdown(id="directory-select-id", className="mb-3"),
+                dbc.FormGroup(
+                    [
+                        dbc.Label("Select Scenario Set"),
+                        dcc.Dropdown(
+                            id="directory-select-id", className="mb-3"
+                        ),
+                    ]
+                )
+            ],
+            width=3,
+        ),
+        dbc.Col(
+            [
                 dbc.Button(
                     "Update list",
                     id="update-dirlist",
                     n_clicks=0,
                     color="secondary",
-                ),
-            ]
+                )
+            ],
+            width={"order": "last", "offset": 0},
+            align="center",
         ),
-        dbc.Col([dcc.Graph(id="supply_demand_aggr_graph_all", figure={})]),
+    ]  # ,  justify="between"
+)
+
+energy = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                dcc.Graph(
+                                    id="supply_demand_aggr_graph_all",
+                                    figure={},
+                                )
+                            ],
+                            width="auto",
+                        )
+                    ],
+                    justify="center",
+                )
+            ]
+        )
     ]
 )
 
-layout = html.Div([row])
-
-
-@app.callback(
-    Output("supply_demand_aggr_graph_all", "figure"),
-    [Input("directory-select-id", "value")],
+capacities = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [dcc.Graph(id="results-capacity-plot", figure={})],
+                            width="auto",
+                        )
+                    ],
+                    justify="center",
+                )
+            ]
+        )
+    ]
 )
-def display_aggregated_supply_demand_graph(scenario_directory):
-    if scenario_directory is None:
-        return plots.empty_plot("")
-    else:
-        dir = os.path.join(results_directory, scenario_directory)
-        scenarios = [
-            s.replace(".csv", "")
-            for s in os.listdir(dir)
-            if s.endswith(".csv")
-        ]
-        plot = plots.aggregated_supply_demand(dir, scenarios)
-        plot["layout"].update({"width": 800})
-        return plot
 
-    # path = os.path.exists(os.path.join(results_directory, directory))
-    # if os.path.exists(path):
-    #     scenarios = os.path.listdir(path)
-    #     return plots.aggregated_supply_demand(path, scenarios)
-    # else:
-    #     return {}
+
+layout = html.Div([form, energy, capacities])
 
 
 @app.callback(
@@ -70,3 +100,38 @@ def update_dirlist_select(n_clicks):
         ]
     else:
         return []
+
+
+@app.callback(
+    Output("supply_demand_aggr_graph_all", "figure"),
+    [Input("directory-select-id", "value")],
+)
+def display_aggregated_supply_demand_graph(scenario_directory):
+    if scenario_directory is None:
+        return plots.empty_plot("")
+    else:
+        dir = os.path.join(results_directory, scenario_directory)
+        scenarios = [
+            s.replace(".csv", "")
+            for s in os.listdir(dir)
+            if s.endswith(".csv")
+        ]
+        plot = plots.aggregated_supply_demand(dir, scenarios)
+        plot["layout"].update({"width": 1000, "height": 700})
+        return plot
+
+
+@app.callback(
+    Output("results-capacity-plot", "figure"),
+    [Input("directory-select-id", "value")],
+)
+def result_capacity_plot(scenario_directory):
+    if scenario_directory is None:
+        return plots.empty_plot("")
+    else:
+        file = os.path.join(results_directory, "capacity.csv")
+        df = pd.read_csv(file).set_index("Technology")
+        df = df.reindex(sorted(df.columns), axis=1)
+        plot = plots.stacked_capacity_plot(df, config)
+        plot["layout"].update({"width": 1000, "height": 700})
+        return plot

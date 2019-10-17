@@ -24,6 +24,8 @@ def aggregated_supply_demand(results_directory, scenarios):
             )  # -> TWh
             agg_df = pd.concat([agg_df, agg], axis=1)
     agg_df.columns = scenarios
+    agg_df = agg_df.T
+    agg_df = agg_df.reindex(sorted(agg_df.index), axis=0)
 
     layout = go.Layout(
         barmode="relative",
@@ -38,8 +40,7 @@ def aggregated_supply_demand(results_directory, scenarios):
 
     mapper = {"storage-consumption": "storage"}
     data = []
-
-    for idx, row in agg_df.T.iteritems():
+    for idx, row in agg_df.iteritems():
         if idx == "storage-consumption":
             legend = False
         else:
@@ -111,3 +112,50 @@ def empty_plot(label_annotation):
     )
 
     return {"data": data, "layout": layout}
+
+
+def stacked_capacity_plot(df, config):
+    return {
+        "data": [
+            go.Bar(
+                name=idx,
+                x=row.index,
+                y=row.values,
+                marker=dict(color=app.color_dict.get(idx.lower(), "black")),
+            )
+            for idx, row in df.iterrows()
+            if idx not in ["Demand", "Storage Capacity"]
+        ]
+        + [
+            go.Scatter(
+                mode="markers",
+                name="Demand (el)",
+                x=df.columns,
+                y=df.loc["Demand"].values,
+                marker=dict(
+                    color=app.color_dict.get("demand", "darkblue"),
+                    size=12,
+                    line=dict(color="DarkSlateGray", width=2),
+                ),
+                yaxis="y2",
+            )
+        ],
+        "layout": go.Layout(
+            barmode="stack",
+            title="Installed capacities and demand scenarios",
+            legend=dict(x=1.1, y=0),
+            yaxis=dict(
+                title="Capacity in {}".format(config["units"]["power"]),
+                titlefont=dict(size=16, color="rgb(107, 107, 107)"),
+                tickfont=dict(size=14, color="rgb(107, 107, 107)"),
+            ),
+            yaxis2=dict(
+                title="Demand in TWh",
+                overlaying="y",
+                rangemode="tozero",
+                autorange=True,
+                side="right",
+                showgrid=False,
+            ),
+        ),
+    }
