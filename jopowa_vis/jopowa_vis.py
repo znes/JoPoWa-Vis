@@ -1,9 +1,11 @@
+import os
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from jopowa_vis.app import app, config
+from jopowa_vis.app import app, config, results_directory
 from jopowa_vis.apps import (
     start_page,
     overview,
@@ -68,17 +70,15 @@ index_page = dbc.Card(
                         ),
                         dbc.Col(
                             [
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("Select scenario"),
-                                        dcc.Dropdown(
-                                            id="scenario-select-id",
-                                            className="mb-3",
-                                        ),
-                                    ]
+                                dbc.Button(
+                                    "Update Results",
+                                    id="update-dirlist",
+                                    n_clicks=0,
+                                    color="secondary",
                                 )
                             ],
-                            width={"size": 2, "order": "last"},
+                            width={"order": "last", "offset": 0},
+                            align="center",
                         ),
                     ]
                 ),
@@ -106,19 +106,38 @@ def display_page(pathname):
     else:
         return index_page
 
+@app.callback(
+    Output("directory-select-id", "options"),
+    [Input("update-dirlist", "n_clicks")],
+)
+def update_dirlist_select(n_clicks):
+    if n_clicks > 0:
+        items = os.listdir(results_directory)
+
+        return [
+            {"label": i, "value": i}
+            for i in items
+            if os.path.isdir(os.path.join(results_directory, i))
+        ]
+    else:
+        return []
 
 @app.callback(
     Output("scenario-select-id", "options"),
-    [Input("scenario-table-technology", "columns")],
+    [Input("directory-select-id", "value")],
 )
-def update_scenario_select(columns):
-    if columns is None:
-        return None
-
+def update_scenario_select(scenario_set):
+    if scenario_set is None:
+        return [None]
+    files = os.listdir(os.path.join(results_directory, scenario_set))
+    scenarios = [
+        s.replace(".csv", "")
+        for s in files
+        if s.endswith(".csv") and s != 'capacity.csv'
+    ]
     return [
-        {"label": c["id"], "value": c["name"]}
-        for c in columns
-        if c["id"] != "Technology"
+        {"label": f, "value": f}
+        for f in scenarios
     ]
 
 

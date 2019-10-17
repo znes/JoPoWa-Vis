@@ -27,15 +27,17 @@ form = dbc.Row(
         ),
         dbc.Col(
             [
-                dbc.Button(
-                    "Update list",
-                    id="update-dirlist",
-                    n_clicks=0,
-                    color="secondary",
+                dbc.FormGroup(
+                    [
+                        dbc.Label("Select scenario"),
+                        dcc.Dropdown(
+                            id="scenario-select-id",
+                            className="mb-3",
+                        ),
+                    ]
                 )
             ],
-            width={"order": "last", "offset": 0},
-            align="center",
+            width={"size": 2, "order": "last"},
         ),
     ]  # ,  justify="between"
 )
@@ -84,22 +86,6 @@ capacities = dbc.Card(
 
 layout = html.Div([form, energy, capacities])
 
-
-@app.callback(
-    Output("directory-select-id", "options"),
-    [Input("update-dirlist", "n_clicks")],
-)
-def update_dirlist_select(n_clicks):
-    if n_clicks > 0:
-        items = os.listdir(results_directory)
-
-        return [
-            {"label": i, "value": i}
-            for i in items
-            if os.path.isdir(os.path.join(results_directory, i))
-        ]
-    else:
-        return []
 
 
 @app.callback(

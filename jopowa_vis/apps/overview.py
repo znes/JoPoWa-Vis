@@ -201,7 +201,8 @@ layout = html.Div([upload, table, plot_card])
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
-    Output("save-output", "children"),
+    [Output("save-output", "children"),
+     Output("update-dirlist", "n_clicks")],
     [Input("save-button", "n_clicks"),
      Input("save-scenario-input", "value")],
     state=[State("scenario-table-technology", "data")],
@@ -221,9 +222,9 @@ def save_scenario_changes(n_clicks, scenario_set_name, data):
             [(i, dir) for i in df.columns.values]
         )
 
-        return "Saved!"
+        return "Saved!", 1
     else:
-        return ""
+        return "", 0
 
 
 # stacked capacity plot -------------------------------------------------------
