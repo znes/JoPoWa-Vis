@@ -64,21 +64,21 @@ hourly_power_graph = dbc.Card(
                 ),
                 dbc.Row(
                     [
-                        dbc.Form(
-                            [
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Button(
-                                            "Compute",
-                                            id="open",
-                                            color="primary",
-                                            n_clicks=0,
-                                        )
-                                    ]
-                                )
-                            ],
-                            inline=True,
-                        )
+                        # dbc.Form(
+                        #     [
+                        #         dbc.FormGroup(
+                        #             [
+                        #                 dbc.Button(
+                        #                     "Compute",
+                        #                     id="open",
+                        #                     color="primary",
+                        #                     n_clicks=0,
+                        #                 )
+                        #             ]
+                        #         )
+                        #     ],
+                        #     inline=True,
+                        # )
                     ]
                 ),
             ]
