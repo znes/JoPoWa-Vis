@@ -6,6 +6,89 @@ import plotly.graph_objs as go
 from jopowa_vis import app
 
 
+def hourly_power_plot(df, scenario, config):
+    """
+    """
+
+    data = []
+
+    layout = go.Layout(
+        barmode="stack",
+        title="Hourly supply and demand in for <br> scenario {}.".format(
+            scenario
+        ),
+        yaxis=dict(
+            title="Supply and Demand in {}".format(config["units"]["power"]),
+            titlefont=dict(size=16, color="rgb(107, 107, 107)"),
+            tickfont=dict(size=14, color="rgb(107, 107, 107)"),
+        ),
+    )
+
+    for c in df.columns:
+        if "demand" in c:
+            data.append(
+                go.Scatter(
+                    x=df.index,
+                    y=df[c],
+                    name=c,
+                    line=dict(
+                        width=3, color=app.color_dict.get(c.lower(), "black")
+                    ),
+                )
+            )
+        elif c == "excess":
+            data.append(
+                go.Scatter(
+                    x=df.index,
+                    y=df[c] * -1,
+                    name=c,
+                    stackgroup="negative",
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
+                )
+            )
+        elif "storage" in c:
+            data.append(
+                go.Scatter(
+                    x=df.index,
+                    y=df[c].clip(lower=0),
+                    name=c,
+                    stackgroup="positive",
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
+                    showlegend=True,
+                )
+            )
+            data.append(
+                go.Scatter(
+                    x=df.index,
+                    y=df[c].clip(upper=0),
+                    name=c,
+                    stackgroup="negative",
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
+                    showlegend=False,
+                )
+            )
+        else:
+            data.append(
+                go.Scatter(
+                    x=df.index,
+                    fillcolor=app.color_dict.get(c.lower(), "black"),
+                    y=df[c].clip(lower=0),
+                    name=c,
+                    stackgroup="positive",
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
+                )
+            )
+    return {"data": data, "layout": layout}
+
+
 def aggregated_supply_demand(results_directory, scenarios):
     """
     """

@@ -51,7 +51,7 @@ hourly_power_graph = dbc.Card(
                                     id="hourly-production-graph", figure={}
                                 )
                             ],
-                            width=8,
+                            width={"size": 8, "order": "first"},
                         ),
                         dbc.Col(
                             [
@@ -59,7 +59,7 @@ hourly_power_graph = dbc.Card(
                                     id="supply_demand_aggr_graph", figure={}
                                 )
                             ],
-                            width=4,
+                            width="auto",
                         ),
                     ]
                 ),
@@ -132,23 +132,6 @@ def display_hourly_graph(rows, scenario, scenario_set):
     if scenario is None:
         return plots.empty_plot("")
 
-    layout = go.Layout(
-        barmode="stack",
-        title="Hourly supply and demand in for <br> scenario {}.".format(
-            scenario
-        ),
-        yaxis=dict(
-            title="Supply and Demand in {}".format(config["units"]["power"]),
-            titlefont=dict(size=16, color="rgb(107, 107, 107)"),
-            tickfont=dict(size=14, color="rgb(107, 107, 107)"),
-        ),
-    )
-
-    data = []
-
-    if scenario == "" or scenario is None:
-        return plots.empty_plot("")
-
     elif os.path.exists(
         os.path.join(results_directory, scenario_set, scenario + ".csv")
     ):
@@ -157,78 +140,12 @@ def display_hourly_graph(rows, scenario, scenario_set):
             parse_dates=True,
             index_col=0,
         )
-
-        for c in df.columns:
-            if "demand" in c:
-                data.append(
-                    go.Scatter(
-                        x=df.index,
-                        y=df[c],
-                        name=c,
-                        line=dict(
-                            width=3,
-                            color=app.color_dict.get(c.lower(), "black"),
-                        ),
-                    )
-                )
-            elif c == "excess":
-                data.append(
-                    go.Scatter(
-                        x=df.index,
-                        y=df[c] * -1,
-                        name=c,
-                        stackgroup="negative",
-                        line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
-                        ),
-                    )
-                )
-            elif "storage" in c:
-                data.append(
-                    go.Scatter(
-                        x=df.index,
-                        y=df[c].clip(lower=0),
-                        name=c,
-                        stackgroup="positive",
-                        line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
-                        ),
-                        showlegend=True,
-                    )
-                )
-                data.append(
-                    go.Scatter(
-                        x=df.index,
-                        y=df[c].clip(upper=0),
-                        name=c,
-                        stackgroup="negative",
-                        line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
-                        ),
-                        showlegend=False,
-                    )
-                )
-            else:
-                data.append(
-                    go.Scatter(
-                        x=df.index,
-                        fillcolor=app.color_dict.get(c.lower(), "black"),
-                        y=df[c].clip(lower=0),
-                        name=c,
-                        stackgroup="positive",
-                        line=dict(
-                            width=0,
-                            color=app.color_dict.get(c.lower(), "black"),
-                        ),
-                    )
-                )
-        return {"data": data, "layout": layout}
+        plot = plots.hourly_power_plot(df, scenario, config)
+        plot["layout"].update({"width": 1000})
+        return plot
 
     else:
-        return {}
+        return plots.empty_plot("")
 
 
 @app.callback(

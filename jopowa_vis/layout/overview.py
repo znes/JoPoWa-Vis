@@ -20,9 +20,9 @@ upload = html.Div(
     [
         dcc.Upload(
             id="datatable-upload",
-            children=html.Div(["Drag and Drop or ", html.A("Select Files")]),
+            children=html.Div(["Drag and Drop or ", html.A("Scenario File")]),
             style={
-                "width": "100%",
+                "width": "80%",
                 "height": "60px",
                 "lineHeight": "60px",
                 "borderWidth": "1px",
@@ -35,7 +35,6 @@ upload = html.Div(
     ]
 )
 
-
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
@@ -47,53 +46,6 @@ def parse_contents(contents, filename):
         return pd.read_excel(io.BytesIO(decoded))
 
 
-@app.callback(
-    [
-        Output("scenario-table-technology", "data"),
-        Output("scenario-table-technology", "columns"),
-    ],
-    [
-        Input("add-column-button", "n_clicks"),
-        Input("datatable-upload", "contents"),
-    ],
-    [
-        State("datatable-upload", "filename"),
-        State("add-column-input", "value"),
-        State("scenario-table-technology", "data"),
-        State("scenario-table-technology", "columns"),
-    ],
-)
-def update_output(
-    n_clicks, contents, filename, value, existing_data, existing_columns
-):
-    # need to return a valid column is callback is called
-    if existing_columns is None:
-        return [{}], [{"id": "Technology", "name": "Technology"}]
-
-    # if callback is triggered by button
-    if n_clicks > 0:
-        existing_columns.append(
-            {
-                "id": value,
-                "name": value,
-                "renamable": False,
-                "deletable": True,
-                "type": "numeric",
-            }
-        )
-        return existing_data, existing_columns
-
-    if contents is None:
-        return existing_data, existing_columns
-
-    df = parse_contents(contents, filename)
-    return (
-        df.to_dict("records"),
-        [
-            {"id": col, "name": col, "renamable": False, "deletable": True}
-            for col in df.columns
-        ],
-    )
 
 
 table = dbc.Card(
@@ -197,6 +149,55 @@ plot_card = dbc.Card(
 
 layout = html.Div([upload, table, plot_card])
 
+
+# update table ----------------------------------------------------------------
+@app.callback(
+    [
+        Output("scenario-table-technology", "data"),
+        Output("scenario-table-technology", "columns"),
+    ],
+    [
+        Input("add-column-button", "n_clicks"),
+        Input("datatable-upload", "contents"),
+    ],
+    [
+        State("datatable-upload", "filename"),
+        State("add-column-input", "value"),
+        State("scenario-table-technology", "data"),
+        State("scenario-table-technology", "columns"),
+    ],
+)
+def update_output(
+    n_clicks, contents, filename, value, existing_data, existing_columns
+):
+    # need to return a valid column is callback is called
+    if existing_columns is None:
+        return [{}], [{"id": "Technology", "name": "Technology"}]
+
+    # if callback is triggered by button
+    if n_clicks > 0:
+        existing_columns.append(
+            {
+                "id": value,
+                "name": value,
+                "renamable": False,
+                "deletable": True,
+                "type": "numeric",
+            }
+        )
+        return existing_data, existing_columns
+
+    if contents is None:
+        return existing_data, existing_columns
+
+    df = parse_contents(contents, filename)
+    return (
+        df.to_dict("records"),
+        [
+            {"id": col, "name": col, "renamable": False, "deletable": True}
+            for col in df.columns
+        ],
+    )
 
 # save scenario changes -------------------------------------------------------
 @app.callback(

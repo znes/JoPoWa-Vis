@@ -6,11 +6,11 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from jopowa_vis.app import app, config, results_directory
-from jopowa_vis.apps import (
+from jopowa_vis.layout import (
     start_page,
     overview,
     power_system,
-    results_overview,
+    results_overview
 )
 
 
