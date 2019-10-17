@@ -122,7 +122,7 @@ table = dbc.Card(
                                     id="save-scenario-input",
                                     type="text",
                                     value="",
-                                    placeholder="Please enter scenario set name...",
+                                    placeholder="Enter scenario set name...",
                                 ),
                                 dbc.Button(
                                     "Save Changes",
@@ -176,6 +176,7 @@ layout = html.Div([upload, table, plot_card])
 ##############################################################################
 # CALLBACKS
 ##############################################################################
+
 
 # update table ----------------------------------------------------------------
 @app.callback(
