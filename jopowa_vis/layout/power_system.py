@@ -7,7 +7,6 @@ from dash.dependencies import Input, Output, State
 
 import multiprocessing as mp
 import pandas as pd
-import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory, config
 from jopowa_vis.apps import optimization, plots
