@@ -10,7 +10,9 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory, config
-from jopowa_vis.apps import calculations, optimization, plots
+from jopowa_vis.apps import optimization, plots
+
+
 
 # card for hourly production --------------------------------------------------
 hourly_power_graph = dbc.Card(

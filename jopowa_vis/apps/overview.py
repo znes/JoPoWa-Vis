@@ -6,11 +6,13 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table
 
+from itertools import repeat
+import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
 
 from jopowa_vis.app import app, results_directory, config
-from jopowa_vis.apps import calculations, plots
+from jopowa_vis.apps import calculations, plots, optimization
 
 import io
 import base64
@@ -122,7 +124,7 @@ table = dbc.Card(
                                     id="add-column-input",
                                     type="text",
                                     value="",
-                                    placeholder="Please enter scenario name...",
+                                    placeholder="Please enter column name...",
                                 ),
                                 dbc.Button(
                                     "Add scenario",
@@ -131,10 +133,16 @@ table = dbc.Card(
                                     color="secondary",
                                 ),
                             ],
-                            width=4,
+                            width=3,
                         ),
                         dbc.Col(
                             [
+                                dbc.Input(
+                                    id="save-scenario-input",
+                                    type="text",
+                                    value="",
+                                    placeholder="Please enter scenario set name...",
+                                ),
                                 dbc.Button(
                                     "Save Changes",
                                     id="save-button",
@@ -143,7 +151,7 @@ table = dbc.Card(
                                 ),
                                 html.Div(id="save-output"),
                             ],
-                            width={"order": "last"},
+                            width={"order": "last", "size": 3},
                         ),
                     ],
                     justify="between",
@@ -194,20 +202,26 @@ layout = html.Div([upload, table, plot_card])
 # save scenario changes -------------------------------------------------------
 @app.callback(
     Output("save-output", "children"),
-    [Input("save-button", "n_clicks")],
+    [Input("save-button", "n_clicks"),
+     Input("save-scenario-input", "value")],
     state=[State("scenario-table-technology", "data")],
 )
-def save_scenario_changes(n_clicks, data):
+def save_scenario_changes(n_clicks, scenario_set_name, data):
     if n_clicks > 0:
         df = pd.DataFrame(data).set_index("Technology")
 
-        sc = os.path.join(results_directory, "capacity.csv")
-        # if os.path.isfile(sc):
-        #     return False, True
-        # else:
-        df.to_csv(sc)
+        dir = os.path.join(results_directory, scenario_set_name)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
-        return "Saved and computed"
+        df.to_csv(os.path.join(dir, "capacity.csv"))
+        p = mp.Pool(5)
+        x = p.starmap(
+            optimization.compute,
+            [(i, dir) for i in df.columns.values]
+        )
+
+        return "Saved!"
     else:
         return ""
 

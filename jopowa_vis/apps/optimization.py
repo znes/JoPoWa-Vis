@@ -12,6 +12,7 @@ from jopowa_vis.app import results_directory
 
 def compute(
     scenario,
+    scenario_set_path=results_directory,
     input_datapath="jopowa_vis/data/jordan-input-data",
     renewables=["wind", "pv", "csp"],
     initial_storage_level=0.5,
@@ -19,7 +20,7 @@ def compute(
     """
     """
     data = pd.read_csv(
-        os.path.join(results_directory, "capacity.csv")
+        os.path.join(scenario_set_path, "capacity.csv")
     ).set_index("Technology")
     if scenario not in data.columns:
         return False
