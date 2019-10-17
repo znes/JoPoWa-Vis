@@ -35,6 +35,7 @@ upload = html.Div(
     ]
 )
 
+
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
@@ -44,8 +45,6 @@ def parse_contents(contents, filename):
     elif "xls" in filename:
         # Assume that the user uploaded an excel file
         return pd.read_excel(io.BytesIO(decoded))
-
-
 
 
 table = dbc.Card(
@@ -198,6 +197,7 @@ def update_output(
             for col in df.columns
         ],
     )
+
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
