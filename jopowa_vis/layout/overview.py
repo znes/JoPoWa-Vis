@@ -16,23 +16,31 @@ from jopowa_vis.apps import calculations, plots, optimization
 import io
 import base64
 
-upload = html.Div(
+upload = dbc.Row(
     [
-        dcc.Upload(
-            id="datatable-upload",
-            children=html.Div(["Drag and Drop or ", html.A("Scenario File")]),
-            style={
-                "width": "80%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
+        dbc.Col(
+            [
+                dcc.Upload(
+                    id="datatable-upload",
+                    children=html.Div(
+                        ["Drag and Drop or ", html.A("Scenario File")]
+                    ),
+                    style={
+                        "width": "100%",
+                        "height": "60px",
+                        "lineHeight": "60px",
+                        "borderWidth": "1px",
+                        "borderStyle": "dashed",
+                        "borderRadius": "5px",
+                        "textAlign": "center",
+                        "margin": "10px",
+                    },
+                )
+            ],
+            width={"size": 8, "offset": 2},
         )
-    ]
+    ],
+    justify="between",
 )
 
 
@@ -58,13 +66,36 @@ table = dbc.Card(
                             children=[
                                 dash_table.DataTable(
                                     id="scenario-table-technology",
+                                    style_as_list_view=True,
+                                    style_cell={
+                                        "padding": "5px",
+                                        "height": "auto",
+                                        "minWidth": "0px",
+                                        "maxWidth": "120px",
+                                        "whiteSpace": "normal",
+                                    },
+                                    style_header={
+                                        "backgroundColor": "white",
+                                        "fontWeight": "bold",
+                                    },
+                                    style_cell_conditional=[
+                                        {
+                                            "if": {"column_id": c},
+                                            "textAlign": "left",
+                                        }
+                                        for c in ["Technology"]
+                                    ],
                                     data=[{}],
                                     editable=True,
                                 )
                             ],
-                            width=6,
-                        )
-                    ]
+                            width="auto",
+                        ),
+                        dbc.Col(
+                            [dcc.Graph(id="scnenario-table-values-output")]
+                        ),
+                    ],
+                    justify="between",
                 ),
                 dbc.Row(
                     [
@@ -111,7 +142,7 @@ table = dbc.Card(
     ]
 )
 
-# Scenario Plots ---------------------
+
 plot_card = dbc.Card(
     [
         dbc.CardBody(
@@ -124,15 +155,9 @@ plot_card = dbc.Card(
                         ),
                         dbc.Col(
                             [
-                                dcc.Graph(
-                                    id="scnenario-table-values-output",
-                                    figure={
-                                        "layout": go.Layout(
-                                            barmode="stack",
-                                            title="Installed capacities",
-                                        )
-                                    },
-                                )
+                                # dcc.Graph(
+                                #     id="scnenario-table-values-output",
+                                # )
                             ],
                             width=6,
                         ),
@@ -148,6 +173,9 @@ plot_card = dbc.Card(
 
 layout = html.Div([upload, table, plot_card])
 
+##############################################################################
+# CALLBACKS
+##############################################################################
 
 # update table ----------------------------------------------------------------
 @app.callback(
@@ -238,7 +266,9 @@ def display_output(data, columns):
 
     df = pd.DataFrame(data).set_index("Technology")
 
-    return plots.stacked_capacity_plot(df, config)
+    plot = plots.stacked_capacity_plot(df, config)
+    plot["layout"].update({"width": 600})
+    return plot
 
 
 # residual load plot ----------------------------------------------------------
@@ -254,16 +284,15 @@ def display_timeseries(data, scenarios):
 
     # check if dataframe is empty to avoid errors
     if df.empty:
-        return {}
+        return plots.empty_plot("")
     # fill nas to avoid errors in plots (e.g. when converting )
     df = df.fillna(0)
     df.set_index("Technology", inplace=True)
 
     # convert to float
     for c in df.columns:
-        df[c] = df[c].astype("float")
+        df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # if not df.isnull().values.any():
     residual_load = {}
     for c in df.columns:
         residual_load[c] = (

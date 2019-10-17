@@ -10,7 +10,7 @@ from jopowa_vis.layout import (
     start_page,
     overview,
     power_system,
-    results_overview
+    results_overview,
 )
 
 
