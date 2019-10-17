@@ -124,8 +124,9 @@ def compute(n, scenario):
         Input("scenario-table-technology", "data"),
         Input("scenario-select-id", "value"),
     ],
+    [State("directory-select-id", "value")],
 )
-def display_hourly_graph(rows, scenario):
+def display_hourly_graph(rows, scenario, scenario_set):
     """
     """
     if scenario is None:
@@ -148,9 +149,11 @@ def display_hourly_graph(rows, scenario):
     if scenario == "" or scenario is None:
         return plots.empty_plot("")
 
-    elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
+    elif os.path.exists(
+        os.path.join(results_directory, scenario_set, scenario + ".csv")
+    ):
         df = pd.read_csv(
-            os.path.join(results_directory, scenario + ".csv"),
+            os.path.join(results_directory, scenario_set, scenario + ".csv"),
             parse_dates=True,
             index_col=0,
         )
@@ -234,11 +237,15 @@ def display_hourly_graph(rows, scenario):
         Input("scenario-table-technology", "data"),
         Input("scenario-select-id", "value"),
     ],
+    [State("directory-select-id", "value")],
 )
-def display_aggregated_supply_demand_graph(data, scenario):
+def display_aggregated_supply_demand_graph(data, scenario, scenario_set):
     if scenario == "" or scenario is None:
         return plots.empty_plot("")
-    elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
-        return plots.aggregated_supply_demand(results_directory, [scenario])
+    elif os.path.exists(
+        os.path.join(results_directory, scenario_set, scenario + ".csv")
+    ):
+        dir = os.path.join(results_directory, scenario_set)
+        return plots.aggregated_supply_demand(dir, [scenario])
     else:
         return plots.empty_plot("")

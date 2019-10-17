@@ -103,7 +103,9 @@ def result_capacity_plot(scenario_directory):
     if scenario_directory is None:
         return plots.empty_plot("")
     else:
-        file = os.path.join(results_directory, "capacity.csv")
+        file = os.path.join(
+            results_directory, scenario_directory, "capacity.csv"
+        )
         df = pd.read_csv(file).set_index("Technology")
         df = df.reindex(sorted(df.columns), axis=1)
         plot = plots.stacked_capacity_plot(df, config)
