@@ -6,7 +6,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table
 
-from itertools import repeat
 import multiprocessing as mp
 import pandas as pd
 import plotly.graph_objs as go
@@ -201,10 +200,8 @@ layout = html.Div([upload, table, plot_card])
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
-    [Output("save-output", "children"),
-     Output("update-dirlist", "n_clicks")],
-    [Input("save-button", "n_clicks"),
-     Input("save-scenario-input", "value")],
+    [Output("save-output", "children"), Output("update-dirlist", "n_clicks")],
+    [Input("save-button", "n_clicks"), Input("save-scenario-input", "value")],
     state=[State("scenario-table-technology", "data")],
 )
 def save_scenario_changes(n_clicks, scenario_set_name, data):
@@ -217,10 +214,7 @@ def save_scenario_changes(n_clicks, scenario_set_name, data):
 
         df.to_csv(os.path.join(dir, "capacity.csv"))
         p = mp.Pool(5)
-        x = p.starmap(
-            optimization.compute,
-            [(i, dir) for i in df.columns.values]
-        )
+        p.starmap(optimization.compute, [(i, dir) for i in df.columns.values])
 
         return "Saved!", 1
     else:

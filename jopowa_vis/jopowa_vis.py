@@ -86,10 +86,10 @@ index_page = dbc.Card(
                     [
                         dbc.Tab(start_page.map, label="Start Page"),
                         dbc.Tab(overview.layout, label="Scenario Overview"),
-                        dbc.Tab(power_system.layout, label="Power System"),
                         dbc.Tab(
                             results_overview.layout, label="Results Overview"
                         ),
+                        dbc.Tab(power_system.layout, label="Scenario Results"),
                     ]
                 ),
             ]
@@ -105,6 +105,7 @@ def display_page(pathname):
         return overview.layout
     else:
         return index_page
+
 
 @app.callback(
     Output("directory-select-id", "options"),
@@ -122,23 +123,21 @@ def update_dirlist_select(n_clicks):
     else:
         return []
 
+
 @app.callback(
     Output("scenario-select-id", "options"),
     [Input("directory-select-id", "value")],
 )
 def update_scenario_select(scenario_set):
     if scenario_set is None:
-        return [None]
+        return []
     files = os.listdir(os.path.join(results_directory, scenario_set))
     scenarios = [
         s.replace(".csv", "")
         for s in files
-        if s.endswith(".csv") and s != 'capacity.csv'
+        if s.endswith(".csv") and s != "capacity.csv"
     ]
-    return [
-        {"label": f, "value": f}
-        for f in scenarios
-    ]
+    return [{"label": f, "value": f} for f in scenarios]
 
 
 def serve():

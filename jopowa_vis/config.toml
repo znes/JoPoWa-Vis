@@ -3,7 +3,7 @@ title = "JoPoWa-Vis Config"
 description = "Configuration file for the Python visualisation of the Power Water System"
 
 [headings]
-title = "JoPoWA-Vis"
+title = "JoPoWa-Vis"
 sub-title = "Visulatisation of Jordan Power and Water System"
 
 [profile_mapper]

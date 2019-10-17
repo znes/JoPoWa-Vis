@@ -24,21 +24,7 @@ form = dbc.Row(
                 )
             ],
             width=3,
-        ),
-        dbc.Col(
-            [
-                dbc.FormGroup(
-                    [
-                        dbc.Label("Select scenario"),
-                        dcc.Dropdown(
-                            id="scenario-select-id",
-                            className="mb-3",
-                        ),
-                    ]
-                )
-            ],
-            width={"size": 2, "order": "last"},
-        ),
+        )
     ]  # ,  justify="between"
 )
 
@@ -87,7 +73,6 @@ capacities = dbc.Card(
 layout = html.Div([form, energy, capacities])
 
 
-
 @app.callback(
     Output("supply_demand_aggr_graph_all", "figure"),
     [Input("directory-select-id", "value")],
@@ -100,7 +85,7 @@ def display_aggregated_supply_demand_graph(scenario_directory):
         scenarios = [
             s.replace(".csv", "")
             for s in os.listdir(dir)
-            if s.endswith(".csv") and s != 'capacity.csv'
+            if s.endswith(".csv") and s != "capacity.csv"
         ]
         if scenarios:
             plot = plots.aggregated_supply_demand(dir, scenarios)

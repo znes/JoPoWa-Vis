@@ -13,13 +13,35 @@ from jopowa_vis.app import app, results_directory, config
 from jopowa_vis.apps import optimization, plots
 
 
-
 # card for hourly production --------------------------------------------------
 hourly_power_graph = dbc.Card(
     [
         dbc.CardHeader(["Hourly Power Supply and Demand"]),
         dbc.CardBody(
             [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                # ?
+                            ]
+                        ),
+                        dbc.Col(
+                            [
+                                dbc.FormGroup(
+                                    [
+                                        dbc.Label("Select scenario"),
+                                        dcc.Dropdown(
+                                            id="scenario-select-id",
+                                            className="mb-3",
+                                        ),
+                                    ]
+                                )
+                            ],
+                            width={"size": 2, "order": "last"},
+                        ),
+                    ]
+                ),
                 dbc.Alert("", id="alert", dismissable=True, is_open=False),
                 dbc.Row(
                     [
@@ -106,6 +128,9 @@ def compute(n, scenario):
 def display_hourly_graph(rows, scenario):
     """
     """
+    if scenario is None:
+        return plots.empty_plot("")
+
     layout = go.Layout(
         barmode="stack",
         title="Hourly supply and demand in for <br> scenario {}.".format(
@@ -121,7 +146,7 @@ def display_hourly_graph(rows, scenario):
     data = []
 
     if scenario == "" or scenario is None:
-        return {}
+        return plots.empty_plot("")
 
     elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
         df = pd.read_csv(
@@ -212,8 +237,8 @@ def display_hourly_graph(rows, scenario):
 )
 def display_aggregated_supply_demand_graph(data, scenario):
     if scenario == "" or scenario is None:
-        return {}
+        return plots.empty_plot("")
     elif os.path.exists(os.path.join(results_directory, scenario + ".csv")):
         return plots.aggregated_supply_demand(results_directory, [scenario])
     else:
-        return {}
+        return plots.empty_plot("")
