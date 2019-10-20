@@ -27,6 +27,9 @@ other = "gray"
 demand = "darkblue"
 excess = "darkgreen"
 shortage = "darkred"
+gas-gt = "gray"
+gas-ccgt = "darkgray"
+biogas = "green"
 
 [paths]
 profiles = "data/jordan-input-data/profile/energy-water-profile.csv"

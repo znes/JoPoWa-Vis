@@ -3,7 +3,7 @@ import os
 
 from datapackage import Package
 import pandas as pd
-from pyomo.environ import ConcreteModel, Var, Constraint, Objective
+from pyomo.environ import ConcreteModel, Var, Constraint, Objective, Expression
 from pyomo.environ import NonNegativeReals, Reals, minimize
 from pyomo.opt import SolverFactory
 
@@ -14,14 +14,14 @@ def compute(
     scenario,
     scenario_set_path=results_directory,
     input_datapath="jopowa_vis/data/jordan-input-data",
-    renewables=["wind", "pv", "csp"],
+    renewables=["wind", "pv", "csp", "hydro"],
     initial_storage_level=0.5,
 ):
     """
     """
-    data = pd.read_csv(
-        os.path.join(scenario_set_path, "capacity.csv")
-    ).set_index("Technology")
+    data = pd.read_csv(os.path.join(scenario_set_path, "capacity.csv")).set_index(
+        "Technology"
+    )
     if scenario not in data.columns:
         return False
 
@@ -64,7 +64,7 @@ def compute(
     units = [
         u
         for u in data.index
-        if u in carrier_cost.index.get_level_values("carrier")
+        if u in carrier_cost.index.get_level_values("carrier") and data.get(u, 0) > 0
     ]
 
     storages = ["storage"]
@@ -73,9 +73,7 @@ def compute(
     fuel_cost = {}
     var_cost = {}
     for u in units:
-        var_cost[u] = (
-            float(technology.loc["vom", u].value) * 1e3
-        )  # -> Money/GWh
+        var_cost[u] = float(technology.loc["vom", u].value) * 1e3  # -> Money/GWh
         fuel_cost[u] = (
             float(
                 (carrier_cost.loc["baseline", u].value)
@@ -102,9 +100,7 @@ def compute(
         else:
             return (0, 0)
 
-    m.p = Var(
-        timesteps, units, within=NonNegativeReals, bounds=max_capacity_rule
-    )
+    m.p = Var(timesteps, units, within=NonNegativeReals, bounds=max_capacity_rule)
 
     m.excess = Var(timesteps, ["excess"], within=NonNegativeReals)
     m.shortage = Var(timesteps, ["shortage"], within=NonNegativeReals)
@@ -134,8 +130,7 @@ def compute(
         else:
             expr += (
                 m.c_storage[t, s]
-                == m.c_storage[t - pd.DateOffset(hours=1), s]
-                - m.p_storage[t, s]
+                == m.c_storage[t - pd.DateOffset(hours=1), s] - m.p_storage[t, s]
             )
         return expr
 
@@ -152,13 +147,26 @@ def compute(
 
     m.energy_balance_constr = Constraint(timesteps, rule=energy_balance)
 
+    m.total_variable_cost = Expression(
+        expr=sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
+    )
+    m.total_fuel_cost = Expression(
+        expr=sum(m.p[t, u] * fuel_cost[u] for t in timesteps for u in units)
+    )
+    m.total_co2_cost = Expression(
+        expr=sum(m.p[t, u] * co2_cost[u] for t in timesteps for u in units)
+    )
+    m.total_shortage_cost = Expression(
+        expr=sum(m.shortage[t, "shortage"] * 3000e3 for t in timesteps)
+    )
+
     # Objective function
     def obj_rule(m):
         expr = 0
-        expr += sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
-        expr += sum(m.p[t, u] * fuel_cost[u] for t in timesteps for u in units)
-        expr += sum(m.p[t, u] * co2_cost[u] for t in timesteps for u in units)
-        expr += sum(m.shortage[t, "shortage"] * 3000e3 for t in timesteps)
+        expr += m.total_variable_cost
+        expr += m.total_fuel_cost
+        expr += m.total_co2_cost
+        expr += m.total_shortage_cost
         return expr
 
     m.costs = Objective(sense=minimize, rule=obj_rule)
@@ -171,12 +179,12 @@ def compute(
     # Solve the model
     opt.solve(m, tee=True)
 
+    total_cost = pd.Series({i.name: i() for i in m.component_objects(Expression)})
+
     results = {
         var.name: pd.Series(
             {index: var[index].value for index in var},
-            index=pd.MultiIndex.from_tuples(
-                var, names=("timestep", "carrier")
-            ),
+            index=pd.MultiIndex.from_tuples(var, names=("timestep", "carrier")),
         ).unstack("carrier")
         for var in m.component_objects(Var)
     }
@@ -198,18 +206,23 @@ def compute(
 
     results_df.to_csv(results_path)
 
+    # TODO: Fix path handling to store costs in file for alle scenarios
+    # currently rows are appended... :-(
+    # total_cost.to_csv(os.path.join(scenario_set_path,  "cost.csv"), mode="a")
+
     return True
 
 
 if __name__ == "__main__":
     import multiprocessing as mp
 
-    scenarios = [
-        "Mix incl. Nuclear",
-        "Current plans + Gas",
-        "RE + Gas",
-        "Medium RE + Gas",
-        "No Imports",
-    ]
-    p = mp.Pool(5)
-    p.map(compute, scenarios)
+    compute("BL 2017")
+    # scenarios = [
+    #     "Mix incl. Nuclear",
+    #     "Current plans + Gas",
+    #     "RE + Gas",
+    #     "Medium RE + Gas",
+    #     "No Imports",
+    # ]
+    # p = mp.Pool(5)
+    # p.map(compute, scenarios)

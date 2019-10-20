@@ -1,9 +1,12 @@
 scenario,carrier,value,unit,source
-baseline,uranium,1.692,EUR/MWh,Own Assumption
-baseline,lignite,5.6,EUR/MWh,Own Assumption
-baseline,coal,8.4,EUR/MWh,Own Assumption
-baseline,gas,26.4,EUR/MWh,Own Assumption
-baseline,oil,48.3,EUR/MWh,Own Assumption
-baseline,co2,29.4,EUR/t,Own Assumption
-baseline,biomass,27.29,EUR/MWh,Own Assumption
-baseline,waste,6.7,EUR/MWh,Own Assumption
+baseline,uranium,1.692,JOD/MWh,Own Assumption
+baseline,lignite,5.6,JOD/MWh,Own Assumption
+baseline,coal,8.4,JOD/MWh,Own Assumption
+baseline,gas,26.4,JOD/MWh,Own Assumption
+baseline,gas-gt,26.4,JOD/MWh,Own Assumption
+baseline,gas-ccgt,26.4,JOD/MWh,Own Assumption
+baseline,oil,48.3,JOD/MWh,Own Assumption
+baseline,co2,29.4,JOD/MWh,Own Assumption
+baseline,biomass,27.29,JOD/MWh,Own Assumption
+baseline,biogas,27.29,JOD/MWh,Own Assumption
+baseline,waste,6.7,JOD/MWh,Own Assumption

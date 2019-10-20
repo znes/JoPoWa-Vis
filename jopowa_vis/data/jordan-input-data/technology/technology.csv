@@ -1,7 +1,10 @@
 parameter,carrier,tech,value,unit,source
 efficiency,biomass,ce,0.35,per unit,Own assumption
+efficiency,biogas,ce,0.35,per unit,Own assumption
 efficiency,coal,st,0.4,per unit,TYNDP2016A
 efficiency,gas,ccgt,0.5,per unit,TYNDP2016A
+efficiency,gas-ccgt,ccgt,0.5,per unit,TYNDP2016A
+efficiency,gas-gt,gt,0.5,per unit,TYNDP2016A
 efficiency,hydro,rsv,0.9,per unit,DIW
 efficiency,lignite,st,0.4,per unit,TYNDP2016A
 efficiency,oil,ocgt,0.35,per unit,TYNDP2016A
@@ -17,8 +20,11 @@ avf,oil,ocgt,0.9,per unit,Own assumption
 avf,uranium,st,0.9,per unit,Own assumption
 avf,lithium,battery,0.9,per unit,Own assumption
 vom,biomass,ce,3,Euro/Mwh,Own assumption
+vom,biogas,ce,3,Euro/Mwh,Own assumption
 vom,coal,st,3.3,Euro/Mwh,TYNDP2016A
 vom,gas,ccgt,1.6,Euro/Mwh,TYNDP2016A
+vom,gas-ccgt,ccgt,1.6,Euro/Mwh,TYNDP2016A
+vom,gas-gt,gt,1.6,Euro/Mwh,TYNDP2016A
 vom,hydro,rsv,0,Euro/Mwh,DIW
 vom,lignite,st,3.3,Euro/Mwh,TYNDP2016A
 vom,oil,ocgt,3.3,Euro/Mwh,TYNDP2016A
