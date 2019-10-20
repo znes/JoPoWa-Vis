@@ -37,13 +37,14 @@ energy = dbc.Card(
                         dbc.Col(
                             [
                                 dcc.Graph(
-                                    id="supply_demand_aggr_graph_all"
+                                    id="results-capacity-plot",
+                                    figure={}
                                 )
                             ],
                             width="auto",
                         ),
                         dbc.Col(
-                            [dcc.Graph(id="results-capacity-plot")],
+                            [dcc.Graph(id="supply_demand_aggr_graph_all", figure={})],
                             width="auto",
                         )
                     ],

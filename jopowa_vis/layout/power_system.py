@@ -41,7 +41,6 @@ hourly_power_graph = dbc.Card(
                         ),
                     ]
                 ),
-                dbc.Alert("", id="alert", dismissable=True, is_open=False),
                 dbc.Row(
                     [
                         dbc.Col(
@@ -89,32 +88,6 @@ hourly_power_graph = dbc.Card(
 layout = html.Div([hourly_power_graph])
 
 
-@app.callback(
-    [
-        Output("alert", "children"),
-        Output("alert", "is_open"),
-        Output("alert", "color"),
-    ],
-    [Input("open", "n_clicks")],
-    [State("scenario-select-id", "value")],
-)
-def compute(n, scenario):
-    if n > 0:
-        if scenario is not None:
-            p = mp.Pool(1)
-            x = p.map(optimization.compute, [scenario])
-            # x is an array due to mapping
-            if False in x:
-                return (
-                    "Computation not possible. Did you save the scenario set?",
-                    True,
-                    "danger",
-                )
-            else:
-                return "Computation done.", True, "success"
-        else:
-            return "No scenario selected.", True, "warning"
-    return "", True, ""
 
 
 @app.callback(

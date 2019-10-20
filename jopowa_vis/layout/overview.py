@@ -5,6 +5,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table
+from dash_table.Format import Format
 
 import multiprocessing as mp
 import pandas as pd
@@ -59,7 +60,8 @@ table = dbc.Card(
     [
         dbc.CardHeader([]),
         dbc.CardBody(
-            [
+            [                           dbc.Alert("", id="alert", dismissable=True, is_open=False),
+
                 dbc.Row(
                     [
                         dbc.Col(
@@ -130,7 +132,6 @@ table = dbc.Card(
                                     n_clicks=0,
                                     color="primary",
                                 ),
-                                html.Div(id="save-output"),
                             ],
                             width={"order": "last", "size": 3},
                         ),
@@ -222,7 +223,8 @@ def update_output(
     return (
         df.to_dict("records"),
         [
-            {"id": col, "name": col, "renamable": False, "deletable": True}
+            {"id": col, "name": col, "renamable": False, "deletable": True,
+             "format": Format(nully=0)}
             for col in df.columns
         ],
     )
@@ -230,7 +232,10 @@ def update_output(
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
-    [Output("save-output", "children"), Output("update-dirlist", "n_clicks")],
+    [Output("alert", "children"),
+    Output("alert", "is_open"),
+    Output("alert", "color"),
+    Output("update-dirlist", "n_clicks")],
     [Input("save-button", "n_clicks"), Input("save-scenario-input", "value")],
     state=[State("scenario-table-technology", "data")],
 )
@@ -244,11 +249,13 @@ def save_scenario_changes(n_clicks, scenario_set_name, data):
 
         df.to_csv(os.path.join(dir, "capacity.csv"))
         p = mp.Pool(5)
-        p.starmap(optimization.compute, [(i, dir) for i in df.columns.values])
-
-        return "Saved!", 1
+        check = p.starmap(optimization.compute, [(i, dir) for i in df.columns.values])
+        if False in check:
+            return "An error occured during optimization!", True, "danger", 0
+        else:
+            return "Saved. Computation successful!", True, "success", 1
     else:
-        return "", 0
+        return "", False, "", 0
 
 
 # stacked capacity plot -------------------------------------------------------

@@ -14,7 +14,9 @@ def hourly_power_plot(df, scenario, config):
 
     layout = go.Layout(
         barmode="stack",
-        title="Hourly supply and demand in for <br> scenario {}.".format(scenario),
+        title="Hourly supply and demand in for <br> scenario {}.".format(
+            scenario
+        ),
         yaxis=dict(
             title="Supply and Demand in {}".format(config["units"]["power"]),
             titlefont=dict(size=16, color="rgb(107, 107, 107)"),
@@ -29,7 +31,9 @@ def hourly_power_plot(df, scenario, config):
                     x=df.index,
                     y=df[c],
                     name=c,
-                    line=dict(width=3, color=app.color_dict.get(c.lower(), "black")),
+                    line=dict(
+                        width=3, color=app.color_dict.get(c.lower(), "black")
+                    ),
                 )
             )
         elif c == "excess":
@@ -39,7 +43,9 @@ def hourly_power_plot(df, scenario, config):
                     y=df[c] * -1,
                     name=c,
                     stackgroup="negative",
-                    line=dict(width=0, color=app.color_dict.get(c.lower(), "black")),
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
                 )
             )
         elif "storage" in c:
@@ -49,7 +55,9 @@ def hourly_power_plot(df, scenario, config):
                     y=df[c].clip(lower=0),
                     name=c,
                     stackgroup="positive",
-                    line=dict(width=0, color=app.color_dict.get(c.lower(), "black")),
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
                     showlegend=True,
                 )
             )
@@ -59,7 +67,9 @@ def hourly_power_plot(df, scenario, config):
                     y=df[c].clip(upper=0),
                     name=c,
                     stackgroup="negative",
-                    line=dict(width=0, color=app.color_dict.get(c.lower(), "black")),
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
                     showlegend=False,
                 )
             )
@@ -71,7 +81,9 @@ def hourly_power_plot(df, scenario, config):
                     y=df[c].clip(lower=0),
                     name=c,
                     stackgroup="positive",
-                    line=dict(width=0, color=app.color_dict.get(c.lower(), "black")),
+                    line=dict(
+                        width=0, color=app.color_dict.get(c.lower(), "black")
+                    ),
                 )
             )
     return {"data": data, "layout": layout}
@@ -130,7 +142,9 @@ def aggregated_supply_demand(results_directory, scenarios, config):
                 showlegend=legend,
                 name=mapper.get(idx, idx),
                 marker=dict(
-                    color=app.color_dict.get(mapper.get(idx, idx).lower(), "gray")
+                    color=app.color_dict.get(
+                        mapper.get(idx, idx).lower(), "gray"
+                    )
                 ),
             )
         )

@@ -19,9 +19,9 @@ def compute(
 ):
     """
     """
-    data = pd.read_csv(os.path.join(scenario_set_path, "capacity.csv")).set_index(
-        "Technology"
-    )
+    data = pd.read_csv(
+        os.path.join(scenario_set_path, "capacity.csv")
+    ).set_index("Technology")
     if scenario not in data.columns:
         return False
 
@@ -64,7 +64,8 @@ def compute(
     units = [
         u
         for u in data.index
-        if u in carrier_cost.index.get_level_values("carrier") and data.get(u, 0) > 0
+        if u in carrier_cost.index.get_level_values("carrier")
+        and data.get(u, 0) > 0
     ]
 
     storages = ["storage"]
@@ -100,7 +101,9 @@ def compute(
         else:
             return (0, 0)
 
-    m.p = Var(timesteps, units, within=NonNegativeReals, bounds=max_capacity_rule)
+    m.p = Var(
+        timesteps, units, within=NonNegativeReals, bounds=max_capacity_rule
+    )
 
     m.excess = Var(timesteps, ["excess"], within=NonNegativeReals)
     m.shortage = Var(timesteps, ["shortage"], within=NonNegativeReals)
@@ -130,7 +133,8 @@ def compute(
         else:
             expr += (
                 m.c_storage[t, s]
-                == m.c_storage[t - pd.DateOffset(hours=1), s] - m.p_storage[t, s]
+                == m.c_storage[t - pd.DateOffset(hours=1), s]
+                - m.p_storage[t, s]
             )
         return expr
 
@@ -177,14 +181,20 @@ def compute(
     opt = SolverFactory("cbc")
 
     # Solve the model
-    opt.solve(m, tee=True)
-
-    total_cost = pd.Series({i.name: i() for i in m.component_objects(Expression)})
+    try:
+        opt.solve(m, tee=True)
+    except:
+        return False
+    total_cost = pd.Series(
+        {i.name: i() for i in m.component_objects(Expression)}
+    )
 
     results = {
         var.name: pd.Series(
             {index: var[index].value for index in var},
-            index=pd.MultiIndex.from_tuples(var, names=("timestep", "carrier")),
+            index=pd.MultiIndex.from_tuples(
+                var, names=("timestep", "carrier")
+            ),
         ).unstack("carrier")
         for var in m.component_objects(Var)
     }
@@ -216,7 +226,7 @@ def compute(
 if __name__ == "__main__":
     import multiprocessing as mp
 
-    compute("BL 2017")
+    compute("Test2000")
     # scenarios = [
     #     "Mix incl. Nuclear",
     #     "Current plans + Gas",

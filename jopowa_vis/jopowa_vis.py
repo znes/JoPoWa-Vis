@@ -6,7 +6,12 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from jopowa_vis.app import app, config, results_directory
-from jopowa_vis.layout import start_page, overview, power_system, results_overview
+from jopowa_vis.layout import (
+    start_page,
+    overview,
+    power_system,
+    results_overview,
+)
 
 
 app.layout = html.Div(
@@ -22,7 +27,8 @@ index_page = dbc.Card(
                         dbc.Col(
                             [
                                 html.H2(
-                                    config["headings"]["title"], className="card-title"
+                                    config["headings"]["title"],
+                                    className="card-title",
                                 ),
                                 html.H3(config["headings"]["sub-title"]),
                             ]
@@ -80,7 +86,9 @@ index_page = dbc.Card(
                     [
                         dbc.Tab(start_page.map, label="Start Page"),
                         dbc.Tab(overview.layout, label="Scenario Overview"),
-                        dbc.Tab(results_overview.layout, label="Results Overview"),
+                        dbc.Tab(
+                            results_overview.layout, label="Results Overview"
+                        ),
                         dbc.Tab(power_system.layout, label="Scenario Results"),
                     ]
                 ),
@@ -100,7 +108,8 @@ def display_page(pathname):
 
 
 @app.callback(
-    Output("directory-select-id", "options"), [Input("update-dirlist", "n_clicks")]
+    Output("directory-select-id", "options"),
+    [Input("update-dirlist", "n_clicks")],
 )
 def update_dirlist_select(n_clicks):
     if n_clicks > 0:
@@ -116,7 +125,8 @@ def update_dirlist_select(n_clicks):
 
 
 @app.callback(
-    Output("scenario-select-id", "options"), [Input("directory-select-id", "value")]
+    Output("scenario-select-id", "options"),
+    [Input("directory-select-id", "value")],
 )
 def update_scenario_select(scenario_set):
     if scenario_set is None:
