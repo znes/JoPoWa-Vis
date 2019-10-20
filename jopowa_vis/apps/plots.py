@@ -88,10 +88,10 @@ def aggregated_supply_demand(results_directory, scenarios, config):
                 parse_dates=True,
                 index_col=0,
             )
-            agg = df[df > 0].sum() / 1e6  # -> TWh
+            agg = df[df > 0].sum() / 1e3  # -> TWh
             agg[["demand", "excess"]] = agg[["demand", "excess"]].multiply(-1)
             agg["storage-consumption"] = (
-                df["storage"].clip(upper=0).sum() / 1e6
+                df["storage"].clip(upper=0).sum() / 1e3
             )  # -> TWh
             agg_df = pd.concat([agg_df, agg], axis=1)
     agg_df.columns = scenarios
