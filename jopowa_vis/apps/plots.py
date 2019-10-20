@@ -77,7 +77,7 @@ def hourly_power_plot(df, scenario, config):
     return {"data": data, "layout": layout}
 
 
-def aggregated_supply_demand(results_directory, scenarios):
+def aggregated_supply_demand(results_directory, scenarios, config):
     """
     """
     agg_df = pd.DataFrame()
@@ -88,10 +88,10 @@ def aggregated_supply_demand(results_directory, scenarios):
                 parse_dates=True,
                 index_col=0,
             )
-            agg = df[df > 0].sum() / 1e3  # -> TWh
+            agg = df[df > 0].sum() / 1e6  # -> TWh
             agg[["demand", "excess"]] = agg[["demand", "excess"]].multiply(-1)
             agg["storage-consumption"] = (
-                df["storage"].clip(upper=0).sum() / 1e3
+                df["storage"].clip(upper=0).sum() / 1e6
             )  # -> TWh
             agg_df = pd.concat([agg_df, agg], axis=1)
     agg_df.columns = scenarios
@@ -103,7 +103,7 @@ def aggregated_supply_demand(results_directory, scenarios):
         title="Aggregated supply and demand",
         width=400,
         yaxis=dict(
-            title="Energy in TWh",
+            title="Energy in {}".format(config["units"]["energy"]),
             titlefont=dict(size=16, color="rgb(107, 107, 107)"),
             tickfont=dict(size=14, color="rgb(107, 107, 107)"),
         ),
@@ -120,9 +120,9 @@ def aggregated_supply_demand(results_directory, scenarios):
             go.Bar(
                 x=row.index,
                 y=row.values,
-                text=[v.round(1) for v in row.values],
+                text=[v.round(2) for v in row.values],
                 hovertext=[
-                    ", ".join([str(v.round(1)), mapper.get(idx, idx)])
+                    ", ".join([str(v.round(2)), mapper.get(idx, idx)])
                     for v in row.values
                 ],
                 hoverinfo="text",
@@ -219,7 +219,7 @@ def stacked_capacity_plot(df, config):
                 tickfont=dict(size=14, color="rgb(107, 107, 107)"),
             ),
             yaxis2=dict(
-                title="Demand in TWh",
+                title="Demand in {}".format(config["units"]["energy"]),
                 overlaying="y",
                 rangemode="tozero",
                 autorange=True,

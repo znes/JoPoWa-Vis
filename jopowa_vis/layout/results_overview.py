@@ -91,7 +91,7 @@ def display_aggregated_supply_demand_graph(scenario_directory):
             if s.endswith(".csv") and s != "capacity.csv"
         ]
         if scenarios:
-            plot = plots.aggregated_supply_demand(dir, scenarios)
+            plot = plots.aggregated_supply_demand(dir, scenarios, config)
             plot["layout"].update({"width": 800, "height": 600})
             return plot
         else:

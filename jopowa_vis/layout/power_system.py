@@ -162,7 +162,7 @@ def display_aggregated_supply_demand_graph(data, scenario, scenario_set):
         os.path.join(results_directory, scenario_set, scenario + ".csv")
     ):
         dir = os.path.join(results_directory, scenario_set)
-        plot = plots.aggregated_supply_demand(dir, [scenario])
+        plot = plots.aggregated_supply_demand(dir, [scenario], config)
         plot["layout"].update({"width": 500})
         return plot
     else:
