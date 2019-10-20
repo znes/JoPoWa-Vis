@@ -3,15 +3,17 @@ import os
 from pkg_resources import resource_filename
 import dash
 import dash_bootstrap_components as dbc
-
 import pandas as pd
 import toml
 
 from oemof.tabular.tools.plots import color_dict
 
-external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
+
+# external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+app.css.append_css({"external_url": "/static/{}".format("bWLwgP.css")})
 
 app.config.suppress_callback_exceptions = True
 
