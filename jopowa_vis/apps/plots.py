@@ -211,7 +211,7 @@ def stacked_capacity_plot(df, config):
         ],
         "layout": go.Layout(
             barmode="stack",
-            title="Installed capacities and demand scenarios",
+            title="Installed capacities and demand",
             legend=dict(x=1.1, y=0),
             yaxis=dict(
                 title="Capacity in {}".format(config["units"]["power"]),
