@@ -153,7 +153,7 @@ plot_card = dbc.Card(
                     [
                         dbc.Col(
                             [dcc.Graph(id="scenario-residual-load-plot")],
-                            width=6,
+                             width=12,
                         ),
                         dbc.Col(
                             [
@@ -161,10 +161,10 @@ plot_card = dbc.Card(
                                 #     id="scnenario-table-values-output",
                                 # )
                             ],
-                            width=6,
+                            width=0,
                         ),
-                    ],
-                    form=True,
+                    ], justify="between"
+
                 )
             ]
         )
@@ -318,7 +318,7 @@ def display_timeseries(data, scenarios):
         ],
         "layout": go.Layout(
             title="Sorted residual load for scenarios (duration curve)",
-            legend=dict(x=1.1, y=0),
+            width=1200,
             yaxis=dict(
                 title="Energy in {}".format(config["units"]["energy"]),
                 titlefont=dict(size=16, color="rgb(107, 107, 107)"),
