@@ -246,8 +246,8 @@ def update_output(
     ],
     [Input("save-button", "n_clicks")],
     state=[
-        State("scenario-table-technology", "data"),
         State("save-scenario-input", "value"),
+        State("scenario-table-technology", "data")
     ],
 )
 def save_scenario_changes(n_clicks, scenario_set_name, data):

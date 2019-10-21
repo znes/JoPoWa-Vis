@@ -53,7 +53,7 @@ def compute(
         .read(keyed=True)
     ).set_index(["carrier"])
 
-    timesteps = profiles.index[0:5]
+    timesteps = profiles.index[:]
 
     demand = (profiles["demand"] * data["demand"]) * 1e3  # -> TWh
 
@@ -82,7 +82,7 @@ def compute(
     fuel_cost = {}
     var_cost = {}
     for u in units:
-        var_cost[u] = float(technology.loc["vom", u].value) * 1  # -> Money/MWh
+        # var_cost[u] = float(technology.loc["vom", u].value) * 1  # -> Money/MWh
         fuel_cost[u] = (
             float(
                 (carrier_cost.loc["baseline", u].value)
@@ -90,14 +90,14 @@ def compute(
             )
             * 1
         )  # -> Money/MWh
-        co2_cost[u] = (
-            float(
-                (carrier_cost.loc["baseline", "co2"].value)
-                / technology.loc["efficiency", u].value
-                * emission_factor.loc[u].value
-            )
-            * 1
-        )  # -> Money/MWh
+        # co2_cost[u] = (
+        #     float(
+        #         (carrier_cost.loc["baseline", "co2"].value)
+        #         / technology.loc["efficiency", u].value
+        #         * emission_factor.loc[u].value
+        #     )
+        #     * 1
+        # )  # -> Money/MWh
 
     # Create model
     m = ConcreteModel()
@@ -165,15 +165,15 @@ def compute(
 
     m.co2_emissions = Expression(units, rule=co2_emissions)
 
-    m.total_variable_cost = Expression(
-        expr=sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
-    )
+    # m.total_variable_cost = Expression(
+    #     expr=sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
+    # )
     m.total_fuel_cost = Expression(
         expr=sum(m.p[t, u] * fuel_cost[u] for t in timesteps for u in units)
     )
-    m.total_co2_cost = Expression(
-        expr=sum(m.p[t, u] * co2_cost[u] for t in timesteps for u in units)
-    )
+    # m.total_co2_cost = Expression(
+    #     expr=sum(m.p[t, u] * co2_cost[u] for t in timesteps for u in units)
+    # )
     m.total_shortage_cost = Expression(
         expr=sum(m.shortage[t, "shortage"] * 3000e6 for t in timesteps)
     )
@@ -181,9 +181,9 @@ def compute(
     # Objective function
     def obj_rule(m):
         expr = 0
-        expr += m.total_variable_cost
+        #expr += m.total_variable_cost
         expr += m.total_fuel_cost
-        expr += m.total_co2_cost
+        #expr += m.total_co2_cost
         expr += m.total_shortage_cost
         return expr
 
