@@ -127,7 +127,7 @@ table = dbc.Card(
                                     placeholder="Enter scenario set name...",
                                 ),
                                 dbc.Button(
-                                    "Save Changes",
+                                    "Save and Compute",
                                     id="save-button",
                                     n_clicks=0,
                                     color="primary",
