@@ -31,3 +31,4 @@ vom,oil,ocgt,3.3,Euro/Mwh,TYNDP2016A
 vom,uranium,st,9,Euro/Mwh,TYNDP2016A
 vom,lithium,battery,0,Euro/Mwh,Own assumption
 storage_capacity,lithium,battery,5,h,Own assumption
+efficiency,import,ocgt,0.35,per unit,Own assumption
