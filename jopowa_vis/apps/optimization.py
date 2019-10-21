@@ -70,7 +70,7 @@ def compute(
 
     co2_factor = {
         u: float(
-            emission_factor.loc[u].value
+            1 #emission_factor.loc[u].value
             / technology.loc["efficiency", u].value
         )
         for u in units
