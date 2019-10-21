@@ -237,8 +237,9 @@ def update_output(
     Output("alert", "is_open"),
     Output("alert", "color"),
     Output("update-dirlist", "n_clicks")],
-    [Input("save-button", "n_clicks"), Input("save-scenario-input", "value")],
-    state=[State("scenario-table-technology", "data")],
+    [Input("save-button", "n_clicks")],
+    state=[State("scenario-table-technology", "data"),
+           State("save-scenario-input", "value")],
 )
 def save_scenario_changes(n_clicks, scenario_set_name, data):
     if n_clicks > 0:
