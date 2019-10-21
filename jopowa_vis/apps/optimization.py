@@ -53,7 +53,7 @@ def compute(
         .read(keyed=True)
     ).set_index(["carrier"])
 
-    timesteps = profiles.index[:]
+    timesteps = profiles.index[0:5]
 
     demand = (profiles["demand"] * data["demand"]) * 1e3  # -> TWh
 
@@ -67,6 +67,14 @@ def compute(
         if u in carrier_cost.index.get_level_values("carrier")
         and data.get(u, 0) > 0
     ]
+
+    co2_factor = {
+        u: float(
+            emission_factor.loc[u].value
+            / technology.loc["efficiency", u].value
+        )
+        for u in units
+    }
 
     storages = ["storage"]
 
@@ -151,6 +159,12 @@ def compute(
 
     m.energy_balance_constr = Constraint(timesteps, rule=energy_balance)
 
+    def co2_emissions(m, u):
+        expr = sum(m.p[t, u] * co2_factor[u] for t in timesteps)
+        return expr
+
+    m.co2_emissions = Expression(units, rule=co2_emissions)
+
     m.total_variable_cost = Expression(
         expr=sum(m.p[t, u] * var_cost[u] for t in timesteps for u in units)
     )
@@ -163,7 +177,7 @@ def compute(
     m.total_shortage_cost = Expression(
         expr=sum(m.shortage[t, "shortage"] * 3000e6 for t in timesteps)
     )
-
+    
     # Objective function
     def obj_rule(m):
         expr = 0
@@ -185,9 +199,20 @@ def compute(
         opt.solve(m, tee=True)
     except:
         return False
-    total_cost = pd.Series(
-        {i.name: i() for i in m.component_objects(Expression)}
-    )
+    # total_cost = pd.Series(
+    #     {
+    #         i.name: i()
+    #         for i in m.component_objects(Expression)
+    #         if i.name != "co2_emissions"
+    #     }
+    # )
+    # co2_emissions = {
+    #     i: m.co2_emissions[i].expr() for i in m.co2_emissions._index
+    # }
+
+    import pdb
+
+    pdb.set_trace()
 
     results = {
         var.name: pd.Series(
@@ -226,13 +251,13 @@ def compute(
 if __name__ == "__main__":
     import multiprocessing as mp
 
-    compute("Test2000")
-    # scenarios = [
-    #     "Mix incl. Nuclear",
-    #     "Current plans + Gas",
-    #     "RE + Gas",
-    #     "Medium RE + Gas",
-    #     "No Imports",
-    # ]
-    # p = mp.Pool(5)
-    # p.map(compute, scenarios)
+    # compute("BLE2018")
+    scenarios = [
+        "Mix incl. Nuclear",
+        "Current plans + Gas",
+        "RE + Gas",
+        "Medium RE + Gas",
+        "No Imports",
+    ]
+    p = mp.Pool(5)
+    p.map(compute, scenarios)

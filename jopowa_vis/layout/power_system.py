@@ -5,11 +5,10 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-import multiprocessing as mp
 import pandas as pd
 
 from jopowa_vis.app import app, results_directory, config
-from jopowa_vis.apps import optimization, plots
+from jopowa_vis.apps import plots
 
 
 # card for hourly production --------------------------------------------------
@@ -86,8 +85,6 @@ hourly_power_graph = dbc.Card(
 )
 
 layout = html.Div([hourly_power_graph])
-
-
 
 
 @app.callback(

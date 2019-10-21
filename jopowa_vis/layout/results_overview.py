@@ -35,18 +35,18 @@ energy = dbc.Card(
                 dbc.Row(
                     [
                         dbc.Col(
+                            [dcc.Graph(id="results-capacity-plot", figure={})],
+                            width="auto",
+                        ),
+                        dbc.Col(
                             [
                                 dcc.Graph(
-                                    id="results-capacity-plot",
-                                    figure={}
+                                    id="supply_demand_aggr_graph_all",
+                                    figure={},
                                 )
                             ],
                             width="auto",
                         ),
-                        dbc.Col(
-                            [dcc.Graph(id="supply_demand_aggr_graph_all", figure={})],
-                            width="auto",
-                        )
                     ],
                     justify="center",
                 )
@@ -55,23 +55,7 @@ energy = dbc.Card(
     ]
 )
 
-capacities = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                dbc.Row(
-                    [
-                        # dbc.Col(
-                        #     [dcc.Graph(id="results-capacity-plot", figure={})],
-                        #     width="auto",
-                        # )
-                    ],
-                    justify="center",
-                )
-            ]
-        )
-    ]
-)
+capacities = dbc.Card([dbc.CardBody([dbc.Row([], justify="center")])])
 
 
 layout = html.Div([form, energy, capacities])

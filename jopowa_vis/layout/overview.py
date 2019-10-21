@@ -60,8 +60,8 @@ table = dbc.Card(
     [
         dbc.CardHeader([]),
         dbc.CardBody(
-            [                           dbc.Alert("", id="alert", dismissable=True, is_open=False),
-
+            [
+                dbc.Alert("", id="alert", dismissable=True, is_open=False),
                 dbc.Row(
                     [
                         dbc.Col(
@@ -95,7 +95,7 @@ table = dbc.Card(
                         ),
                         dbc.Col(
                             [dcc.Graph(id="scnenario-table-values-output")],
-                        width="auto"
+                            width="auto",
                         ),
                     ],
                     justify="between",
@@ -153,7 +153,7 @@ plot_card = dbc.Card(
                     [
                         dbc.Col(
                             [dcc.Graph(id="scenario-residual-load-plot")],
-                             width=12,
+                            width=12,
                         ),
                         dbc.Col(
                             [
@@ -163,8 +163,8 @@ plot_card = dbc.Card(
                             ],
                             width=0,
                         ),
-                    ], justify="between"
-
+                    ],
+                    justify="between",
                 )
             ]
         )
@@ -224,8 +224,13 @@ def update_output(
     return (
         df.to_dict("records"),
         [
-            {"id": col, "name": col, "renamable": False, "deletable": True,
-             "format": Format(nully=0)}
+            {
+                "id": col,
+                "name": col,
+                "renamable": False,
+                "deletable": True,
+                "format": Format(nully=0),
+            }
             for col in df.columns
         ],
     )
@@ -233,13 +238,17 @@ def update_output(
 
 # save scenario changes -------------------------------------------------------
 @app.callback(
-    [Output("alert", "children"),
-    Output("alert", "is_open"),
-    Output("alert", "color"),
-    Output("update-dirlist", "n_clicks")],
+    [
+        Output("alert", "children"),
+        Output("alert", "is_open"),
+        Output("alert", "color"),
+        Output("update-dirlist", "n_clicks"),
+    ],
     [Input("save-button", "n_clicks")],
-    state=[State("scenario-table-technology", "data"),
-           State("save-scenario-input", "value")],
+    state=[
+        State("scenario-table-technology", "data"),
+        State("save-scenario-input", "value"),
+    ],
 )
 def save_scenario_changes(n_clicks, scenario_set_name, data):
     if n_clicks > 0:
@@ -252,7 +261,8 @@ def save_scenario_changes(n_clicks, scenario_set_name, data):
         df.to_csv(os.path.join(dir, "capacity.csv"))
         p = mp.Pool(5)
         check = p.starmap(
-            optimization.compute, [(i, dir) for i in df.columns.values])
+            optimization.compute, [(i, dir) for i in df.columns.values]
+        )
         if False in check:
             return "An error occured during optimization!", True, "danger", 0
         else:
@@ -278,7 +288,7 @@ def display_output(data, columns):
     df = pd.DataFrame(data).set_index("Technology")
 
     plot = plots.stacked_capacity_plot(df, config)
-    #plot["layout"].update({"height": 600, "width": 900})
+    # plot["layout"].update({"height": 600, "width": 900})
     return plot
 
 

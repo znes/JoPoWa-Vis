@@ -9,11 +9,11 @@ import toml
 from oemof.tabular.tools.plots import color_dict
 
 
-external_stylesheets = [ "/static/{}".format("bWLwgP.css")]
+external_stylesheets = ["/static/{}".format("bWLwgP.css")]
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-#app.css.append_css({"external_url": "/static/{}".format("bWLwgP.css")})
+# app.css.append_css({"external_url": "/static/{}".format("bWLwgP.css")})
 
 app.config.suppress_callback_exceptions = True
 
