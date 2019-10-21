@@ -177,7 +177,7 @@ def compute(
     m.total_shortage_cost = Expression(
         expr=sum(m.shortage[t, "shortage"] * 3000e6 for t in timesteps)
     )
-    
+
     # Objective function
     def obj_rule(m):
         expr = 0
@@ -210,9 +210,6 @@ def compute(
     #     i: m.co2_emissions[i].expr() for i in m.co2_emissions._index
     # }
 
-    import pdb
-
-    pdb.set_trace()
 
     results = {
         var.name: pd.Series(
