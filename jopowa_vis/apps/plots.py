@@ -112,6 +112,7 @@ def aggregated_supply_demand(results_directory, scenarios, config):
 
     layout = go.Layout(
         barmode="relative",
+        legend_orientation="h",
         title="Aggregated supply and demand",
         width=400,
         yaxis=dict(
@@ -226,7 +227,7 @@ def stacked_capacity_plot(df, config):
         "layout": go.Layout(
             barmode="stack",
             title="Installed capacities and demand",
-            legend=dict(x=1.1, y=0),
+            legend_orientation="h",
             yaxis=dict(
                 title="Capacity in {}".format(config["units"]["power"]),
                 titlefont=dict(size=16, color="rgb(107, 107, 107)"),

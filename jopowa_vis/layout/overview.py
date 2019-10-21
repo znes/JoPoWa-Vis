@@ -94,7 +94,8 @@ table = dbc.Card(
                             width="auto",
                         ),
                         dbc.Col(
-                            [dcc.Graph(id="scnenario-table-values-output")]
+                            [dcc.Graph(id="scnenario-table-values-output")],
+                        width="auto"
                         ),
                     ],
                     justify="between",
@@ -249,7 +250,8 @@ def save_scenario_changes(n_clicks, scenario_set_name, data):
 
         df.to_csv(os.path.join(dir, "capacity.csv"))
         p = mp.Pool(5)
-        check = p.starmap(optimization.compute, [(i, dir) for i in df.columns.values])
+        check = p.starmap(
+            optimization.compute, [(i, dir) for i in df.columns.values])
         if False in check:
             return "An error occured during optimization!", True, "danger", 0
         else:
@@ -275,7 +277,7 @@ def display_output(data, columns):
     df = pd.DataFrame(data).set_index("Technology")
 
     plot = plots.stacked_capacity_plot(df, config)
-    plot["layout"].update({"width": 600})
+    #plot["layout"].update({"height": 600, "width": 900})
     return plot
 
 
