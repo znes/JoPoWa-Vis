@@ -4,7 +4,7 @@ description = "Configuration file for the Python visualisation of the Power Wate
 
 [headings]
 title = "JoPoWa-Vis"
-sub-title = "Visulatisation of Jordan Power and Water System"
+sub-title = "Visualisation of the Jordan Power and Water System"
 
 [profile_mapper]
 PV = "pv"
