@@ -11,6 +11,7 @@ from jopowa_vis.layout import (
     overview,
     power_system,
     results_overview,
+    datapackage
 )
 
 
@@ -90,6 +91,7 @@ index_page = dbc.Card(
                             results_overview.layout, label="Results Overview"
                         ),
                         dbc.Tab(power_system.layout, label="Scenario Results"),
+                        dbc.Tab(datapackage.layout, label="Datapackage")
                     ]
                 ),
             ]
@@ -138,6 +140,8 @@ def update_scenario_select(scenario_set):
         if s.endswith(".csv") and s != "capacity.csv"
     ]
     return [{"label": f, "value": f} for f in scenarios]
+
+
 
 
 def serve():
